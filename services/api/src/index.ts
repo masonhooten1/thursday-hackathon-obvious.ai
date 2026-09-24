@@ -15,6 +15,9 @@ const ADMIN_POLL_SECRET = process.env.ADMIN_POLL_SECRET;
 // POLL_CRON="*/5 * * * *" npm start.
 const CRON_SCHEDULE = process.env.POLL_CRON ?? "*/15 * * * *";
 const USER_AGENT = process.env.POLL_USER_AGENT ?? "campground-tonight/0.1 (hackathon MVP; contact: hello@masonhooten.com)";
+// Point at apps/mobile/dist to serve the built web demo from this process
+// (one port for API + app — the hosted demo setup).
+const WEB_DIST_DIR = process.env.SERVE_WEB_DIST;
 
 const db = openDb(DB_PATH);
 createSnapshotsSchema(db);
@@ -26,7 +29,7 @@ const availability: AvailabilitySource = new RecreationGovAvailability(client);
 // availability snapshots, while RIDB-derived metadata lives in the catalog
 // (loaded by the seeder). The app serves cached snapshots from those tables.
 const runPollCycle = createPoller({ db, availability });
-const app = createApp({ db, pollNow: runPollCycle, adminPollSecret: ADMIN_POLL_SECRET });
+const app = createApp({ db, pollNow: runPollCycle, adminPollSecret: ADMIN_POLL_SECRET, webDistDir: WEB_DIST_DIR });
 
 const scheduler = createScheduler(CRON_SCHEDULE, () => {
   runPollCycle().catch((error: unknown) => {

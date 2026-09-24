@@ -11,6 +11,10 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
+    // DB-backed integration files truncate shared tables in beforeAll; run
+    // files one at a time so one file's TRUNCATE can never land mid-suite of
+    // another's (unit files are unaffected — the whole run is still seconds).
+    fileParallelism: false,
   },
   resolve: {
     alias: {

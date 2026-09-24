@@ -59,8 +59,13 @@ async function fetchJson<T>(url: string, schema: Schema<T>): Promise<T> {
   return schema.parse(await response.json());
 }
 
+/** Strip trailing slashes so bases like "/" (same-origin web demo) make clean URLs. */
+export function normalizeApiBase(baseUrl: string): string {
+  return baseUrl.replace(/\/+$/, "");
+}
+
 /** Picks the data source from the environment: API when configured, fixtures otherwise. */
 export function resolveDataSource(env: NodeJS.ProcessEnv = process.env): AvailabilityDataSource {
   const apiUrl = env.EXPO_PUBLIC_API_URL;
-  return apiUrl ? createApiSource(apiUrl) : createFixturesSource();
+  return apiUrl ? createApiSource(normalizeApiBase(apiUrl)) : createFixturesSource();
 }

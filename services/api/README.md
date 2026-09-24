@@ -28,6 +28,15 @@ npm run dev --workspace=@campground/api
 | `POLL_CRON`          | `*/15 * * * *`            | node-cron expression for the poll cadence     |
 | `ADMIN_POLL_SECRET`  | unset (endpoint disabled) | Bearer secret for the manual poll trigger     |
 | `POLL_USER_AGENT`    | `campground-tonight/0.1…` | Identifying User-Agent sent to Recreation.gov |
+| `SERVE_WEB_DIST`     | unset (API-only)          | Directory of the Expo static web export (`../apps/mobile/dist`); served same-origin with SPA fallback |
+
+## Serving the web demo (same origin)
+
+Point `SERVE_WEB_DIST` at the Expo web export to serve the built demo from this
+process — one origin, so the web bundle reads the API with
+`EXPO_PUBLIC_API_URL=/` (no CORS, one port). Unknown paths fall back to the
+export's `index.html`; API routes keep their own 404 behavior. See the root
+README for the full build-and-serve sequence.
 
 ## Endpoints
 

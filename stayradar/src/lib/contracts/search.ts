@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateSchema } from "./shared";
 
 /**
  * Wire contracts for the radius search API (spec art_XasJ5Kw8, "Radius
@@ -9,17 +10,20 @@ import { z } from "zod";
 export const PropertyTypeSchema = z.enum(["cabin", "condo", "house"]);
 export type PropertyType = z.infer<typeof PropertyTypeSchema>;
 
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "expected YYYY-MM-DD");
-
+/**
+ * The query contract accepts both wire forms: query-string parameters arrive
+ * as strings (GET /api/search) and JSON calls send numbers — coerce.number()
+ * normalizes both before the bounds are checked.
+ */
 export const PropertySearchQuerySchema = z
   .object({
-    latitude: z.number().min(-90).max(90),
-    longitude: z.number().min(-180).max(180),
+    latitude: z.coerce.number().min(-90).max(90),
+    longitude: z.coerce.number().min(-180).max(180),
     /** Radius in miles; the spec enforces radius > 0 (defaults to the 25 mi campaign default). */
-    radiusMiles: z.number().positive().max(500).default(25),
-    checkIn: isoDate,
-    checkOut: isoDate,
-    guests: z.number().int().positive().max(50).default(2),
+    radiusMiles: z.coerce.number().positive().max(500).default(25),
+    checkIn: isoDateSchema,
+    checkOut: isoDateSchema,
+    guests: z.coerce.number().int().positive().max(50).default(2),
     propertyType: PropertyTypeSchema.optional(),
     /** Anonymous per-session hash (rotating); never a stable user id. */
     sessionHash: z.string().min(8).max(128).optional(),

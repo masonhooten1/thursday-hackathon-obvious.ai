@@ -1,4 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { join, relative, resolve } from "node:path";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { z } from "zod";
 import {
@@ -41,6 +44,12 @@ export interface AppOptions {
   pollNow: () => Promise<PollCycleReport>;
   /** Bearer secret guarding POST /api/admin/poll; unset disables the endpoint. */
   adminPollSecret?: string;
+  /**
+   * Directory of the Expo static web export (apps/mobile/dist). When set, the
+   * same process serves the built demo on one port with the API — the hosted
+   * web demo's same-origin setup (spec D6). Unset serves the API only.
+   */
+  webDistDir?: string;
   /** Injectable clock (tests pin freshness boundaries). */
   now?: () => Date;
 }
@@ -128,6 +137,34 @@ export function createApp(options: AppOptions): Hono {
       return c.json({ error: "poll cycle failed" }, 500);
     }
   });
+
+  // Same-origin web demo (spec D6): when webDistDir points at the Expo static
+  // export, this process serves both the API and the built app on one port —
+  // the browser fetches with a relative base URL, so no CORS or second host.
+  // Registered after the API routes so /api/* is never shadowed.
+  const webDistDir = options.webDistDir;
+  if (webDistDir !== undefined) {
+    // node-server's serveStatic resolves root against the process cwd; the
+    // relative path keeps an absolute env var working from any launch dir.
+    const root = relative(process.cwd(), resolve(webDistDir));
+    let indexHtml: string | null = null;
+    const readIndex = (): string => {
+      // Cached after first read; a missing export fails here with a clear
+      // ENOENT message instead of a confusing 404 per path.
+      if (indexHtml === null) indexHtml = readFileSync(join(root, "index.html"), "utf8");
+      return indexHtml;
+    };
+    app.use("*", serveStatic({ root }));
+    app.get("*", (c) => {
+      // Unknown API paths stay 404 — only app routes fall back to the SPA shell.
+      if (c.req.path.startsWith("/api/")) return c.notFound();
+      try {
+        return c.html(readIndex());
+      } catch {
+        return c.text("web demo not built — run: npm run export:web --workspace=@campground/mobile", 503);
+      }
+    });
+  }
 
   return app;
 }
