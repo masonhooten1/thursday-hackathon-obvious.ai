@@ -1,0 +1,2 @@
+# Local development tooling — lint + format for api/. Not CI-gated yet.
+ruff==0.16.8
