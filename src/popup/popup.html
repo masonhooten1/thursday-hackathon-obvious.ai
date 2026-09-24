@@ -3,9 +3,55 @@
   <head>
     <meta charset="utf-8" />
     <title>LinkedIn to Email</title>
+    <link rel="stylesheet" href="popup.css" />
+    <script type="module" src="popup.js"></script>
   </head>
   <body>
-    <!-- Popup UI (paste-a-URL flow, result states) arrives in a later task. -->
-    <p>Popup UI lands in a later task.</p>
+    <header class="brand">LINKEDIN &rarr; EMAIL</header>
+    <main id="app">
+      <!-- No key: one path forward — open the options page. -->
+      <section data-section="no-key" hidden>
+        <p class="message" id="no-key-message"></p>
+        <button id="btn-open-options" type="button">Open options</button>
+      </section>
+
+      <!-- Ready + invalid URL share the form; invalid-url shows the inline
+           error and disables the button (spec: "Edit input"). -->
+      <section data-section="ready" hidden>
+        <label class="field">
+          <span class="field-label">Profile URL</span>
+          <input id="input-url" type="url" placeholder="https://www.linkedin.com/in/&hellip;" spellcheck="false" autocomplete="off" />
+        </label>
+        <p class="error" id="invalid-url-message" hidden>That is not a LinkedIn profile URL.</p>
+        <button id="btn-find" type="button">Find email</button>
+      </section>
+
+      <!-- Loading: provider named so a stall is attributable. -->
+      <section data-section="loading" hidden>
+        <p class="message">Finding email&hellip;</p>
+        <p class="meta" id="loading-provider"></p>
+      </section>
+
+      <!-- Found: email, source, confidence — copy is the primary action. -->
+      <section data-section="found" hidden>
+        <p class="email" id="found-email"></p>
+        <p class="meta" id="found-meta"></p>
+        <button id="btn-copy" type="button">Copy email</button>
+        <button id="btn-new-lookup" type="button" class="ghost">New lookup</button>
+      </section>
+
+      <!-- Not found: a miss is not an error — distinct copy, retry stays cheap. -->
+      <section data-section="not-found" hidden>
+        <p class="message">No email found for this profile.</p>
+        <button id="btn-retry-not-found" type="button">Try again</button>
+      </section>
+
+      <!-- Errors (rate limited, network, provider): the adapter's message names
+           the cause; the button returns to the form. -->
+      <section data-section="error" hidden>
+        <p class="message" id="error-message"></p>
+        <button id="btn-retry-error" type="button">Try again</button>
+      </section>
+    </main>
   </body>
 </html>

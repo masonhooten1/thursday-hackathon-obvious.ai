@@ -1,0 +1,93 @@
+/* Popup styles — minimal, consistent with the spec's popup-state descriptions:
+   one card, a state message, at most two actions. */
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  width: 320px;
+  margin: 0;
+  padding: 14px;
+  font: 14px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #1c1c1c;
+}
+
+.brand {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.message {
+  margin: 4px 0 12px;
+}
+
+.email {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 4px 0 2px;
+  word-break: break-all;
+}
+
+.meta {
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 12px;
+}
+
+.error {
+  font-size: 12px;
+  color: #b3261e;
+  margin: 0 0 10px;
+}
+
+.field {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.field-label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+input[type='url'] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font: inherit;
+}
+
+button {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #1a73e8;
+  background: #1a73e8;
+  color: #fff;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button.ghost {
+  background: transparent;
+  color: #1a73e8;
+  margin-top: 6px;
+}
