@@ -1,0 +1,687 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-24T20:41:36Z",
+  "campgrounds": [
+    {
+      "facilityId": 232492,
+      "parkId": "glacier",
+      "name": "St. Mary Campground",
+      "lat": 48.750833,
+      "lng": -113.446944,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232492",
+      "siteTypes": [
+        "tent",
+        "group"
+      ]
+    },
+    {
+      "facilityId": 232493,
+      "parkId": "glacier",
+      "name": "Fish Creek Campground",
+      "lat": 48.547778,
+      "lng": -113.985278,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232493",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 234669,
+      "parkId": "glacier",
+      "name": "Apgar Group Sites",
+      "lat": 48.525,
+      "lng": -113.983611,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/234669",
+      "siteTypes": [
+        "group"
+      ]
+    },
+    {
+      "facilityId": 251869,
+      "parkId": "glacier",
+      "name": "Many Glacier Campground",
+      "lat": 48.796675,
+      "lng": -113.677342,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/251869",
+      "siteTypes": [
+        "tent",
+        "group"
+      ]
+    },
+    {
+      "facilityId": 258795,
+      "parkId": "glacier",
+      "name": "Sprague Creek Campground",
+      "lat": 48.60615,
+      "lng": -113.88471,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/258795",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 258796,
+      "parkId": "glacier",
+      "name": "Avalanche Campground",
+      "lat": 48.676546,
+      "lng": -113.818525,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/258796",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 258799,
+      "parkId": "glacier",
+      "name": "Two Medicine Campground",
+      "lat": 48.492115,
+      "lng": -113.364071,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/258799",
+      "siteTypes": [
+        "tent",
+        "group"
+      ]
+    },
+    {
+      "facilityId": 10171274,
+      "parkId": "glacier",
+      "name": "Apgar Campground",
+      "lat": 48.525002,
+      "lng": -113.983597,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10171274",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 10363618,
+      "parkId": "glacier",
+      "name": "Rising Sun Campground",
+      "lat": 48.69543,
+      "lng": -113.52135,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10363618",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 232489,
+      "parkId": "grand-canyon",
+      "name": "North Rim Campground (AZ)",
+      "lat": 36.210278,
+      "lng": -112.060556,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232489",
+      "siteTypes": [
+        "tent",
+        "group"
+      ]
+    },
+    {
+      "facilityId": 232490,
+      "parkId": "grand-canyon",
+      "name": "Mather Campground",
+      "lat": 36.049722,
+      "lng": -112.120469,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232490",
+      "siteTypes": [
+        "tent",
+        "rv",
+        "group",
+        "other"
+      ]
+    },
+    {
+      "facilityId": 258825,
+      "parkId": "grand-canyon",
+      "name": "Desert View Campground",
+      "lat": 36.038937,
+      "lng": -111.822609,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/258825",
+      "siteTypes": [
+        "rv"
+      ]
+    },
+    {
+      "facilityId": 232434,
+      "parkId": "great-smoky-mountains",
+      "name": "Cataloochee Group Camp",
+      "lat": 35.650667,
+      "lng": -83.073845,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232434",
+      "siteTypes": [
+        "group"
+      ]
+    },
+    {
+      "facilityId": 232436,
+      "parkId": "great-smoky-mountains",
+      "name": "Elkmont Group Camp",
+      "lat": 35.659444,
+      "lng": -83.586389,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232436",
+      "siteTypes": [
+        "group"
+      ]
+    },
+    {
+      "facilityId": 232437,
+      "parkId": "great-smoky-mountains",
+      "name": "Big Creek Group Camp",
+      "lat": 35.752222,
+      "lng": -83.108889,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232437",
+      "siteTypes": [
+        "group"
+      ]
+    },
+    {
+      "facilityId": 232438,
+      "parkId": "great-smoky-mountains",
+      "name": "Cosby Group Camp",
+      "lat": 35.753055,
+      "lng": -83.206725,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232438",
+      "siteTypes": [
+        "group"
+      ]
+    },
+    {
+      "facilityId": 232440,
+      "parkId": "great-smoky-mountains",
+      "name": "Cades Cove Group",
+      "lat": 35.603892,
+      "lng": -83.77131,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232440",
+      "siteTypes": [
+        "group"
+      ]
+    },
+    {
+      "facilityId": 232441,
+      "parkId": "great-smoky-mountains",
+      "name": "Smokemont Group Camp",
+      "lat": 35.559808,
+      "lng": -83.312802,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232441",
+      "siteTypes": [
+        "group"
+      ]
+    },
+    {
+      "facilityId": 232478,
+      "parkId": "great-smoky-mountains",
+      "name": "Deep Creek Group Camp",
+      "lat": 35.463024,
+      "lng": -83.434773,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232478",
+      "siteTypes": [
+        "group"
+      ]
+    },
+    {
+      "facilityId": 232479,
+      "parkId": "great-smoky-mountains",
+      "name": "Cosby Campground",
+      "lat": 35.754545,
+      "lng": -83.20925,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232479",
+      "siteTypes": [
+        "tent",
+        "rv"
+      ]
+    },
+    {
+      "facilityId": 232481,
+      "parkId": "great-smoky-mountains",
+      "name": "Tow String Horse Camp",
+      "lat": 35.539469,
+      "lng": -83.296597,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232481",
+      "siteTypes": [
+        "other"
+      ]
+    },
+    {
+      "facilityId": 232482,
+      "parkId": "great-smoky-mountains",
+      "name": "Cataloochee Horse Camp",
+      "lat": 35.62876,
+      "lng": -83.115594,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232482",
+      "siteTypes": [
+        "other"
+      ]
+    },
+    {
+      "facilityId": 232483,
+      "parkId": "great-smoky-mountains",
+      "name": "Round Bottom Horse Camp",
+      "lat": 35.615459,
+      "lng": -83.211925,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232483",
+      "siteTypes": [
+        "other"
+      ]
+    },
+    {
+      "facilityId": 232484,
+      "parkId": "great-smoky-mountains",
+      "name": "Big Creek Horse Camp",
+      "lat": 35.754268,
+      "lng": -83.107337,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232484",
+      "siteTypes": [
+        "other"
+      ]
+    },
+    {
+      "facilityId": 232485,
+      "parkId": "great-smoky-mountains",
+      "name": "Anthony Creek Horse Camp",
+      "lat": 35.602229,
+      "lng": -83.766402,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232485",
+      "siteTypes": [
+        "other"
+      ]
+    },
+    {
+      "facilityId": 232486,
+      "parkId": "great-smoky-mountains",
+      "name": "Smokemont Campground",
+      "lat": 35.55645,
+      "lng": -83.311626,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232486",
+      "siteTypes": [
+        "tent",
+        "rv"
+      ]
+    },
+    {
+      "facilityId": 232487,
+      "parkId": "great-smoky-mountains",
+      "name": "Elkmont Campground",
+      "lat": 35.658757,
+      "lng": -83.582741,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232487",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 232488,
+      "parkId": "great-smoky-mountains",
+      "name": "Cades Cove Campground",
+      "lat": 35.602725,
+      "lng": -83.776293,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232488",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 233284,
+      "parkId": "great-smoky-mountains",
+      "name": "Cataloochee Campground",
+      "lat": 35.631186,
+      "lng": -83.085541,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/233284",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 273821,
+      "parkId": "great-smoky-mountains",
+      "name": "Big Creek Campground",
+      "lat": 35.750198,
+      "lng": -83.111397,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/273821",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 273847,
+      "parkId": "great-smoky-mountains",
+      "name": "Abram's Creek Campground",
+      "lat": 35.610747,
+      "lng": -83.933183,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/273847",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 273848,
+      "parkId": "great-smoky-mountains",
+      "name": "Balsam Mountain Campground",
+      "lat": 35.565436,
+      "lng": -83.174299,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/273848",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 10041304,
+      "parkId": "great-smoky-mountains",
+      "name": "Deep Creek Campground (NC)",
+      "lat": 35.460938,
+      "lng": -83.434393,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10041304",
+      "siteTypes": [
+        "tent",
+        "rv"
+      ]
+    },
+    {
+      "facilityId": 10207636,
+      "parkId": "great-smoky-mountains",
+      "name": "Look Rock Campground",
+      "lat": 35.636905,
+      "lng": -83.936143,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10207636",
+      "siteTypes": [
+        "tent",
+        "rv"
+      ]
+    },
+    {
+      "facilityId": 247571,
+      "parkId": "yellowstone",
+      "name": "Mammoth Campground",
+      "lat": 44.97361,
+      "lng": -110.693232,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/247571",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 259304,
+      "parkId": "yellowstone",
+      "name": "Indian Creek Campground (WY)",
+      "lat": 44.887023,
+      "lng": -110.736069,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/259304",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 259306,
+      "parkId": "yellowstone",
+      "name": "Norris Campground",
+      "lat": 44.73793,
+      "lng": -110.69321,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/259306",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 259307,
+      "parkId": "yellowstone",
+      "name": "Pebble Creek Campground",
+      "lat": 44.916981,
+      "lng": -110.113808,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/259307",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 259308,
+      "parkId": "yellowstone",
+      "name": "Tower Fall Campground",
+      "lat": 44.88955,
+      "lng": -110.389476,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/259308",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 259309,
+      "parkId": "yellowstone",
+      "name": "Lewis Lake Campground",
+      "lat": 44.282206,
+      "lng": -110.627987,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/259309",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 259310,
+      "parkId": "yellowstone",
+      "name": "Slough Creek Campground",
+      "lat": 44.948847,
+      "lng": -110.306879,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/259310",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 232446,
+      "parkId": "yosemite",
+      "name": "Wawona Campground",
+      "lat": 37.573056,
+      "lng": -119.665,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232446",
+      "siteTypes": [
+        "tent",
+        "rv",
+        "group"
+      ]
+    },
+    {
+      "facilityId": 232447,
+      "parkId": "yosemite",
+      "name": "Upper Pines Campground",
+      "lat": 37.736111,
+      "lng": -119.5625,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232447",
+      "siteTypes": [
+        "tent",
+        "rv"
+      ]
+    },
+    {
+      "facilityId": 232448,
+      "parkId": "yosemite",
+      "name": "Tuolumne Meadows Campground",
+      "lat": 37.871111,
+      "lng": -119.36,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232448",
+      "siteTypes": [
+        "tent",
+        "rv",
+        "group"
+      ]
+    },
+    {
+      "facilityId": 232449,
+      "parkId": "yosemite",
+      "name": "North Pines Campground",
+      "lat": 37.741944,
+      "lng": -119.565556,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232449",
+      "siteTypes": [
+        "tent",
+        "rv"
+      ]
+    },
+    {
+      "facilityId": 232450,
+      "parkId": "yosemite",
+      "name": "Lower Pines Campground",
+      "lat": 37.740833,
+      "lng": -119.566667,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232450",
+      "siteTypes": [
+        "tent",
+        "rv"
+      ]
+    },
+    {
+      "facilityId": 232451,
+      "parkId": "yosemite",
+      "name": "Hodgdon Meadow Campground",
+      "lat": 37.798889,
+      "lng": -119.865833,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232451",
+      "siteTypes": [
+        "tent",
+        "group"
+      ]
+    },
+    {
+      "facilityId": 232452,
+      "parkId": "yosemite",
+      "name": "Crane Flat Campground",
+      "lat": 37.763889,
+      "lng": -119.844444,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232452",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 232453,
+      "parkId": "yosemite",
+      "name": "Bridalveil Creek Campground",
+      "lat": 37.662222,
+      "lng": -119.619722,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232453",
+      "siteTypes": [
+        "tent",
+        "group"
+      ]
+    },
+    {
+      "facilityId": 10004152,
+      "parkId": "yosemite",
+      "name": "Camp 4",
+      "lat": 37.741426,
+      "lng": -119.603357,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10004152",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 10083567,
+      "parkId": "yosemite",
+      "name": "White Wolf Campground",
+      "lat": 37.8703,
+      "lng": -119.6483,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10083567",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 10083831,
+      "parkId": "yosemite",
+      "name": "Porcupine Flat Campground",
+      "lat": 37.8082,
+      "lng": -119.5657,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10083831",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 10083840,
+      "parkId": "yosemite",
+      "name": "Yosemite Creek Campground",
+      "lat": 37.8263,
+      "lng": -119.5983,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10083840",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 10083845,
+      "parkId": "yosemite",
+      "name": "Tamarack Flat Campground",
+      "lat": 37.7517,
+      "lng": -119.7362,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10083845",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 10220609,
+      "parkId": "yosemite",
+      "name": "Wawona Horse Campsites",
+      "lat": 37.539277,
+      "lng": -119.653589,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10220609",
+      "siteTypes": [
+        "other"
+      ]
+    },
+    {
+      "facilityId": 10346420,
+      "parkId": "yosemite",
+      "name": "Tuolumne Horse Campsites",
+      "lat": 37.870937,
+      "lng": -119.356316,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10346420",
+      "siteTypes": [
+        "other"
+      ]
+    },
+    {
+      "facilityId": 10390880,
+      "parkId": "yosemite",
+      "name": "Bridalveil Creek Horse Campsites",
+      "lat": 37.662222,
+      "lng": -119.619722,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10390880",
+      "siteTypes": [
+        "other"
+      ]
+    },
+    {
+      "facilityId": 232445,
+      "parkId": "zion",
+      "name": "Watchman Campground",
+      "lat": 37.198611,
+      "lng": -112.986389,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/232445",
+      "siteTypes": [
+        "tent",
+        "group"
+      ]
+    },
+    {
+      "facilityId": 272266,
+      "parkId": "zion",
+      "name": "South Campground (UT)",
+      "lat": 37.201667,
+      "lng": -112.985556,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/272266",
+      "siteTypes": [
+        "tent"
+      ]
+    },
+    {
+      "facilityId": 10138237,
+      "parkId": "zion",
+      "name": "Lava Point Campground",
+      "lat": 37.3839,
+      "lng": -113.032799,
+      "bookingUrl": "https://www.recreation.gov/camping/campgrounds/10138237",
+      "siteTypes": [
+        "tent"
+      ]
+    }
+  ]
+}

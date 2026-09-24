@@ -7,10 +7,12 @@ Five projects share this monorepo:
 1. **Campground Tonight** (`apps/mobile`, `services/api`, `packages/shared` — npm workspaces from the root):
    last-minute campsite availability on a terrain map. Expo + expo-router client, Hono API with
    better-sqlite3 (WAL) and an in-process node-cron poller, shared zod contract. Spec: Obvious
-   blueprint art_VwFCEgL3. Scaffold (D1) and availability/metadata adapters (D3 — live endpoint
+   blueprint art_VwFCEgL3. Scaffold (D1), availability/metadata adapters (D3 — live endpoint
    discovery in `docs/recreation-gov-endpoints.md`, Recreation.gov + RIDB adapters, politeness
-   client) are done; RIDB live verification is pending a valid API key (see the doc). Catalog
-   (D2), poller (D4), and map UI (D5) land next.
+   client), and the campground catalog (D2 — versioned seed in `services/api/seed/`, seeder with
+   live facility-id health checks, reproducible generator; provenance in
+   `services/api/seed/README.md`) are done; RIDB live verification is pending a valid API key
+   (see the doc). Poller (D4) and map UI (D5) land next.
 2. **Chrome MV3 extension ("LinkedIn to Email")** at the repo root: `manifest.json`, the lookup
    flow (service-worker router, popup state machine, options page, on-profile pill), provider
    adapters, Vitest tooling, a manifest sanity check, and CI. Remaining: visual QA evidence (V6)
@@ -51,6 +53,9 @@ Campground Tonight (from repo root; one `npm install` covers root + all three wo
 - `npm run lint` / `npm run typecheck` — per-workspace fan-out
 - `npm run export:web --workspace=@campground/mobile` — Expo web export to `apps/mobile/dist`
 - `npm run dev --workspace=@campground/api` — API on :8787
+- `npm run seed --workspace=@campground/api` — load `services/api/seed/*.json` into SQLite
+  (catalog tables replaced atomically), health-checking every facility id against the live
+  booking page (spaced GETs); dead ids are flagged in output, never a failure
 - `npm start --workspace=@campground/mobile` — Expo dev server
 
 Extension (repo root):
