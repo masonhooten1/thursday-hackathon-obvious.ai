@@ -4,5 +4,5 @@
     "strict": true,
     "noUncheckedIndexedAccess": true
   },
-  "include": ["app", "lib", "vitest.config.ts", "expo-env.d.ts", ".expo/types/**/*.ts"]
+  "include": ["app", "components", "lib", "vitest.config.ts", "expo-env.d.ts", ".expo/types/**/*.ts"]
 }
