@@ -134,13 +134,19 @@ export interface GuardedFetchDeps {
   timeoutMs?: number;
 }
 
+export interface GuardedFetchResult {
+  response: Response;
+  /** The URL the returned response was actually served from. */
+  finalUrl: string;
+}
+
 /**
  * Fetch with per-hop validation: structural guard → DNS resolution check →
  * request (redirects disabled) → validate the Location and repeat. A redirect
  * chain that lands on a private address is blocked before access — including
  * hops the browser itself would otherwise follow.
  */
-export async function guardedFetch(raw: string, deps: GuardedFetchDeps = {}): Promise<Response> {
+export async function guardedFetch(raw: string, deps: GuardedFetchDeps = {}): Promise<GuardedFetchResult> {
   const fetchImpl = deps.fetchImpl ?? fetch;
   const resolveDns = deps.resolveDns ?? systemResolveDns;
   const maxRedirects = deps.maxRedirects ?? 5;
@@ -162,12 +168,12 @@ export async function guardedFetch(raw: string, deps: GuardedFetchDeps = {}): Pr
     });
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location");
-      if (!location) return response;
+      if (!location) return { response, finalUrl: url.toString() };
       // Resolve relative Locations against the current hop, then re-validate.
       current = new URL(location, url).toString();
       continue;
     }
-    return response;
+    return { response, finalUrl: url.toString() };
   }
   throw new BlockedDestinationError("REDIRECT_LIMIT", `More than ${maxRedirects} redirects from "${raw}".`);
 }

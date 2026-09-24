@@ -96,7 +96,7 @@ describe("guardedFetch — redirect chains (check 8)", () => {
 
   it("follows public redirects and returns the final response", async () => {
     const calls: string[] = [];
-    const response = await guardedFetch("https://example.com/start", {
+    const result = await guardedFetch("https://example.com/start", {
       resolveDns: dns({
         "example.com": ["93.184.216.34"],
         "www.example.com": ["93.184.216.34"],
@@ -107,7 +107,8 @@ describe("guardedFetch — redirect chains (check 8)", () => {
         return new Response("<html>ok</html>", { status: 200 });
       },
     });
-    expect(response.status).toBe(200);
+    expect(result.response.status).toBe(200);
+    expect(result.finalUrl).toBe("https://www.example.com/final");
     expect(calls).toEqual(["https://example.com/start", "https://www.example.com/final"]);
   });
 
