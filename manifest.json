@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "LinkedIn to Email",
+  "version": "0.1.0",
+  "description": "Resolve the LinkedIn profile you're viewing to a company email via your own enrichment API key.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["https://api.prospeo.io/*", "https://api.hunter.io/*"],
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/in/*"],
+      "js": ["src/content/detect.js"],
+      "css": ["src/content/pill.css"]
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html"
+  },
+  "options_page": "src/options/options.html"
+}
