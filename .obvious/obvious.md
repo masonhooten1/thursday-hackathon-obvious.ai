@@ -24,7 +24,11 @@ Five projects share this monorepo:
 4. **SignalPlan** in `signalplan/`: Next.js 15 + TypeScript foundation — frozen Zod contracts
    (`lib/contracts`), Supabase schema + RLS, fail-closed auth, six authenticated API routes,
    Trigger.dev v4 scaffolding. Spec: art_zjmuRNQY.
-5. **StayRadar** in `stayradar/`: Next.js (pnpm) static search shell with fixtures.
+5. **StayRadar** in `stayradar/`: Next.js (pnpm) search shell with fixtures, plus a
+   Drizzle/PostGIS data layer (`properties` with a geography column + GiST
+   index, date-keyed `availability`, `search_events`, `leads`, `campaigns`),
+   an `ST_DWithin` radius search service, and seed/iCal/CSV ingestion
+   connectors with idempotent upserts.
 
 ## Stack
 
@@ -85,6 +89,11 @@ SignalPlan (from repo root):
 StayRadar (from repo root):
 
 - `pnpm --dir stayradar install` / `pnpm --dir stayradar lint` / `pnpm --dir stayradar test` / `pnpm --dir stayradar build`
+- `pnpm --dir stayradar db:migrate` / `pnpm --dir stayradar db:seed` — apply
+  migrations and upsert the 40-property seed inventory (idempotent); need a
+  PostGIS Postgres. Integration tests run when `TEST_DATABASE_URL` is set
+  (CI: `postgis/postgis:16` service container; local path in
+  `stayradar/README.md`).
 
 ## Conventions & handoff
 
