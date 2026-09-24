@@ -17,6 +17,11 @@ venv/
 # --- Models, datasets, and generated artifacts (ingestion/eval land later) ---
 models/
 data/
+# SignalPlan's data layer is source code, not a dataset — keep it tracked
+# (db.ts and encryption.ts already are). Without this negation `data/`
+# silently eats every file under signalplan/lib/data/ (storage.ts was lost
+# to this rule on the main branch).
+!signalplan/lib/data/
 *.lance/
 *.pt
 *.onnx
