@@ -66,7 +66,10 @@ export function buildAvailabilityCalendar(options: CalendarOptions): Availabilit
     const night = addDays(today, i);
     const dayOfWeek = night.getUTCDay();
     const isWeekendNight = dayOfWeek === 5 || dayOfWeek === 6; // Fri, Sat
-    const bookedProbability = occupancy + (isWeekendNight ? 0.3 : -0.15);
+    const bookedProbability = Math.min(
+      1,
+      occupancy + (isWeekendNight ? 0.3 : -0.15) * occupancy,
+    );
     const isBooked = rand() < bookedProbability;
     const isBlocked = !isBooked && rand() < 0.04;
     const status: AvailabilityStatus = isBooked ? "booked" : isBlocked ? "blocked" : "available";
