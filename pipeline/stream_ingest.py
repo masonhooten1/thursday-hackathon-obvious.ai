@@ -25,23 +25,44 @@ from .labels import label_names_from_parquet
 logger = logging.getLogger(__name__)
 
 
+def _load_state(path: Path) -> tuple[list[str], dict[str, int]]:
+    """(processed shard names, species counts) from the checkpoint file."""
+    if not path.exists():
+        return [], {}
+    data = json.loads(path.read_text())
+    if isinstance(data, dict) and "counts" in data and "processed" in data:
+        return list(data["processed"]), dict(data["counts"])
+    return [], dict(data)  # legacy flat species map, predates resume tracking
+
+
+def _save_state(path: Path, processed: list[str], counts: dict[str, int]) -> None:
+    path.write_text(
+        json.dumps({"processed": processed, "counts": counts}, indent=1, sort_keys=True),
+        encoding="utf-8",
+    )
+
+
 def stream_extract(
     shard_names: list[str],
     shards_dir: Path,
     images_dir: Path,
-    counts_path: Path,
-    counts: dict[str, int],
+    state_path: Path,
     cap: int = config.REFERENCE_CAP_PER_SPECIES,
 ) -> dict[str, int]:
     """Download each shard, count species, extract up to cap images, delete shard.
 
-    Counts checkpoint to counts_path after every shard so an interrupted stream
-    resumes without re-downloading.
+    Checkpoints (processed shards, counts) to state_path after every shard; on
+    restart, shards recorded as processed are skipped so counts neither lose
+    nor double count, and nothing re-downloads.
     """
+    processed, counts = _load_state(state_path)
+    done = set(processed)
     inventory = download.shard_inventory(
         config.SOURCE_REPO, config.SOURCE_REVISION, config.SOURCE_SPLITS
     )
     for position, name in enumerate(shard_names):
+        if name in done:
+            continue
         url = config.SHARD_URL.format(
             repo=config.SOURCE_REPO, revision=config.SOURCE_REVISION, name=name
         )
@@ -54,7 +75,8 @@ def stream_extract(
             if counts[row.species_id] <= cap:
                 extract.write_row(images_dir, row)
 
-        counts_path.write_text(json.dumps(counts, indent=1, sort_keys=True), encoding="utf-8")
+        done.add(name)
+        _save_state(state_path, sorted(done), counts)
         shard.unlink()  # free the disk immediately
 
     return counts
@@ -92,15 +114,14 @@ def run_stream(
     embedder: Embedder | None = None,
 ) -> dict:
     """Full streaming run; returns the stats dict also printed by pipeline.run."""
-    counts_path = config.DATA_DIR / "stream_counts.json"
-    counts: dict[str, int] = json.loads(counts_path.read_text()) if counts_path.exists() else {}
+    state_path = config.DATA_DIR / "stream_counts.json"
 
     inventory = download.shard_inventory(
         config.SOURCE_REPO, config.SOURCE_REVISION, config.SOURCE_SPLITS
     )
     shard_names = sorted(inventory)[:max_shards] if max_shards else sorted(inventory)
 
-    counts = stream_extract(shard_names, config.SHARDS_DIR, config.IMAGES_DIR, counts_path, counts)
+    counts = stream_extract(shard_names, config.SHARDS_DIR, config.IMAGES_DIR, state_path)
 
     catalog = select.select_catalog(counts, min_images=min_images, max_species=max_species)
     if not catalog:
