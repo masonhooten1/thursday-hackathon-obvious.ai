@@ -18,11 +18,12 @@ export const runBatchTask = task({
   }: {
     payload: { runId: string; workspaceId: string };
   }) => {
-    return runBatch(payload, new PostgresWorkerRepository(), (companyId) =>
+    return runBatch(payload, new PostgresWorkerRepository(), (company) =>
       tasks.trigger("run-company", {
         runId: payload.runId,
         workspaceId: payload.workspaceId,
-        companyId,
+        companyId: company.id,
+        domain: company.domain,
       }),
     );
   },
@@ -32,13 +33,13 @@ export const runBatchTask = task({
 export async function runBatch(
   payload: { runId: string; workspaceId: string },
   repo: WorkerRepository,
-  enqueueCompany: (companyId: string) => Promise<unknown>,
+  enqueueCompany: (company: { id: string; domain: string }) => Promise<unknown>,
 ): Promise<{ runId: string; status: string }> {
   await repo.setRunStatus(payload.workspaceId, payload.runId, "running");
   const companies = await repo.getRunCompanies(payload.workspaceId, payload.runId);
   for (const company of companies) {
     if (company.status === "queued") {
-      await enqueueCompany(company.id);
+      await enqueueCompany(company);
     }
   }
   // Terminal states arrive as companies finish; the run row is reaped here
