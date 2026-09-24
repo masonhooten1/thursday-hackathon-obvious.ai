@@ -80,13 +80,29 @@ A Chrome (Manifest V3) extension that resolves the LinkedIn profile you are view
 
 Bring your own enrichment key: lookups go straight from your browser to Prospeo (default) or Hunter. Your key, your credits, your account. Results are shown and copied, never stored.
 
-> **Status: functional.** The lookup flow is implemented end to end: service-worker router, provider adapters, popup state machine, options page, and the on-profile pill. Remaining: visual QA evidence (V6, its own task) and pinning the live provider response fixture (V3, first run with a real key).
+> **Status: functional.** The lookup flow is implemented end to end: service-worker router, provider adapters, popup state machine, options page, and the on-profile pill. Remaining: pinning the live provider response fixture (first run with a real key).
 
 ### How it works
 
 1. While you view a profile on `linkedin.com/in/...`, the extension reads the profile URL from the address bar — it never scrapes LinkedIn's page markup.
 2. One click sends that URL to the enrichment provider through the extension's service worker. Your API key is stored locally and sent only to its provider's API.
 3. The company email is shown inline and in the popup, with copy-to-clipboard.
+
+### Visual QA evidence (spec V6)
+
+Captured against a local stub provider (`tests/qa/qa-stub.js`) serving the test fixtures, with a disposable extension copy built by `tests/qa/build-qa-copy.js` (endpoint overrides, a narrow localhost host permission, and a local stand-in for a profile page — test-only patches that never ship). Evidence lives in `docs/qa/`.
+
+| Check | Popup | On-profile pill |
+| --- | --- | --- |
+| No key | [`tc-1-popup-nokey.png`](docs/qa/tc-1-popup-nokey.png) | [`tc-11-pill-nokey.png`](docs/qa/tc-11-pill-nokey.png) |
+| Ready / idle | [`tc-2-popup-ready.png`](docs/qa/tc-2-popup-ready.png) | [`tc-7-pill-idle.png`](docs/qa/tc-7-pill-idle.png) |
+| Loading | [`tc-3-popup-loading.png`](docs/qa/tc-3-popup-loading.png) | [`tc-8-pill-busy.png`](docs/qa/tc-8-pill-busy.png) |
+| Found (+ copied) | [`tc-4-popup-found.png`](docs/qa/tc-4-popup-found.png) · [`tc-4b-popup-copied.png`](docs/qa/tc-4b-popup-copied.png) | [`tc-9-pill-found.png`](docs/qa/tc-9-pill-found.png) |
+| Not found | [`tc-5-popup-notfound.png`](docs/qa/tc-5-popup-notfound.png) | [`tc-10-pill-miss.png`](docs/qa/tc-10-pill-miss.png) |
+| Rate limited | [`tc-6-popup-ratelimited.png`](docs/qa/tc-6-popup-ratelimited.png) | [`tc-10b-pill-ratelimited.png`](docs/qa/tc-10b-pill-ratelimited.png) |
+| Loads clean / key saved | [`tc-8-v1-extensions-page.png`](docs/qa/tc-8-v1-extensions-page.png) · [`tc-12-options-saved.png`](docs/qa/tc-12-options-saved.png) | click→result recorded: [`tc-8-pill-flow.webm`](docs/qa/tc-8-pill-flow.webm) |
+
+Two loading constraints discovered while capturing: Chrome 154 rejects path-specific `web_accessible_resources` match patterns (the shipped patterns are origin-rooted), and content scripts are classic scripts — a bootstrap dynamically imports the pill modules. Both are covered by tests in `tests/qa/`.
 
 ### Load the extension unpacked
 
