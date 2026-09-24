@@ -1,0 +1,5 @@
+{
+  "errors": [
+    { "code": 401, "message": "Invalid or missing API key" }
+  ]
+}
