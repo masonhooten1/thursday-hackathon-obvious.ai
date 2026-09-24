@@ -11,13 +11,15 @@ Five projects share this monorepo:
    discovery in `docs/recreation-gov-endpoints.md`, Recreation.gov + RIDB adapters, politeness
    client), the campground catalog (D2 — versioned seed in `services/api/seed/`, seeder with
    live facility-id health checks, reproducible generator; provenance in
-   `services/api/seed/README.md`), and the map app (D5 — fixture data layer, map-first screen,
-   filters, detail sheet, booking links, Google Maps JS/react-native-maps integration), and
-   the poller + API (D4 — snapshot store, staggered single-flight poll cycle, GET
-   parks/campgrounds/availability, bearer-guarded admin trigger; see `services/api/README.md`)
-   are done; RIDB live verification is pending a valid API key (see the doc). Live integration
-   demo (D6) lands next; the app switches from fixtures to the API when
-   `EXPO_PUBLIC_API_BASE_URL` is reachable.
+   `services/api/seed/README.md`), the poller + API (D4 — snapshot store, staggered single-flight
+   poll cycle, GET parks/campgrounds/availability, bearer-guarded admin trigger; see
+   `services/api/README.md`), and the map app (D5 — fixture data layer, map-first screen,
+   filters, detail sheet, booking links, Google Maps JS/react-native-maps integration) are
+   merged; live integration + demo (D6) is PR #23: same-origin web serving (`SERVE_WEB_DIST`),
+   env config (`.env.example` in both workspaces), hosted demo at
+   https://0e52dligaj-8090.hosted.obvious.ai, and the finalized runbook (root README).
+   The app runs on the live API when `EXPO_PUBLIC_API_URL` is set; unset = fixtures.
+   RIDB live verification is pending a valid API key (see the doc).
 2. **Chrome MV3 extension ("LinkedIn to Email")** at the repo root: `manifest.json`, the lookup
    flow (service-worker router, popup state machine, options page, on-profile pill), provider
    adapters, Vitest tooling, a manifest sanity check, and CI. Visual QA evidence (V6) lives in
@@ -65,6 +67,10 @@ Campground Tonight (from repo root; one `npm install` covers root + all three wo
 - `npm run export:web --workspace=@campground/mobile` — Expo web export to `apps/mobile/dist`
 - `GOOGLE_MAPS_API_KEY` (native config) and `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (web bundle) supply
   the terrain map key — see `docs/google-maps.md`; builds work without it (labeled web fallback)
+- Live demo, one process on :8787 — build the export with `EXPO_PUBLIC_API_URL=/` + the web map
+  key, then `SERVE_WEB_DIST=../apps/mobile/dist ADMIN_POLL_SECRET=local-dev npm run dev
+  --workspace=@campground/api`, trigger one cycle with the admin poll below, and open
+  `http://localhost:8787`; hosted at https://0e52dligaj-8090.hosted.obvious.ai
 - `npm run dev --workspace=@campground/api` — API on :8787 (scheduler armed, poll cadence 15 min)
 - `npm start --workspace=@campground/api` — one-shot run without the watch loop
 - `npm run seed --workspace=@campground/api` — load `services/api/seed/*.json` into SQLite

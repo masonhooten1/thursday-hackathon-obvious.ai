@@ -14,7 +14,7 @@ Hackathon monorepo with five projects sharing the repo:
 
 What is bookable tonight in the parks? A terrain map of national-park campgrounds with availability refreshed every 15 minutes by a polite poller and a booking deep link on every result. Spec: Obvious blueprint art_VwFCEgL3.
 
-> **Status: catalog merged (D1, D2, D3); map app (D5) in flight.** Scaffold, shared contract, CI, the Recreation.gov/RIDB adapters (PRs #9, #14), and the campground catalog (PR #17) are on `main`. The poller (D4) lands in a follow-up PR; this map app is D5.
+> **Status: live end to end (D1–D6).** Scaffold + contract + CI (PR #9), adapters (PR #14), map app (PR #15), catalog (PR #17), and poller + availability API (PR #21) are on `main`. PR #23 wires the app to the live API, serves the web demo from the API process, and finalizes this runbook. Hosted demo: <https://0e52dligaj-8090.hosted.obvious.ai>
 
 ### Structure
 
@@ -29,9 +29,10 @@ What is bookable tonight in the parks? A terrain map of national-park campground
 The terrain map needs a billing-enabled Google Maps Platform key, provided
 through env vars and never committed — see [`docs/google-maps.md`](docs/google-maps.md).
 Without a key the web build renders a labeled fallback and native builds omit
-the map config; nothing fails. Until the poller (D4) serves real snapshots,
-the app runs on fixture data (six parks, 18 campgrounds) with an automatic
-switch to the API when `EXPO_PUBLIC_API_BASE_URL` is reachable.
+the map config; nothing fails. With `EXPO_PUBLIC_API_URL` set — same origin
+(`/`) for the web demo, `http://<your-lan-ip>:8787` in Expo Go — the app reads
+live snapshots from the API; unset, it falls back to fixture data (six parks,
+18 campgrounds).
 
 ### Commands (from the repo root)
 
@@ -63,12 +64,39 @@ from Recreation.gov) — see `services/api/seed/README.md` for provenance and
 curation rules. The seeder flags dead facility ids in its output instead of
 failing; re-running retries anything unverified.
 
-API surface while the poller is pending: `GET /health` and `GET /api/availability?date=YYYY-MM-DD` (empty but contract-valid until D4 wires snapshots in).
+### Run the live demo (one process)
+
+Build the web export with the same-origin API and the map key, then serve the
+API and the demo from one process — `SERVE_WEB_DIST` makes the API serve the
+static export with an SPA fallback (see `services/api/README.md`):
+
+```bash
+EXPO_PUBLIC_API_URL=/ EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=$KEY \
+  npm run export:web --workspace=@campground/mobile
+
+SERVE_WEB_DIST=../apps/mobile/dist ADMIN_POLL_SECRET=local-dev \
+  npm run dev --workspace=@campground/api
+
+# one real poll cycle now — writes snapshots for all 60 campgrounds
+curl -X POST -H "Authorization: Bearer local-dev" \
+  http://localhost:8787/api/admin/poll
+```
+
+Open `http://localhost:8787` for the web demo. For native, run Expo Go against
+the API on your dev machine:
+
+```bash
+EXPO_PUBLIC_API_URL=http://<your-lan-ip>:8787 npm start --workspace=@campground/mobile
+```
+
+API surface: `GET /health`, `GET /api/parks`, `GET /api/campgrounds?parkId=&type=`,
+`GET /api/availability?date=YYYY-MM-DD`, `POST /api/admin/poll` (bearer) — full
+reference in [`services/api/README.md`](services/api/README.md).
 
 ### Conventions
 
 - Wire-format changes go through `packages/shared/src/contract.ts` — zod schemas are the source of truth; types are inferred from them.
-- Only `services/api` talks to Recreation.gov/RIDB. The future adapter keeps one request in flight per host, request spacing, an identifying User-Agent, exponential backoff on 429/5xx, and never retries a 403.
+- Only `services/api` talks to Recreation.gov/RIDB. The availability adapter keeps one request in flight per host, request spacing, an identifying User-Agent, exponential backoff on 429/5xx, and never retries a 403.
 - Metadata-only mode is a designed state: if the availability endpoint proves unusable, map, filters, booking links, and an honest "availability unknown" state still ship.
 - CI (`.github/workflows/campground.yml`) runs lint, typecheck, tests, and the Expo web export on every PR and push to `main`.
 
