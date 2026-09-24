@@ -37,11 +37,19 @@ def gbif_common_name(scientific_name: str) -> str | None:
         results = matches.get("results", []) if isinstance(matches, dict) else []
         if not results:
             return None
-        usage_key = results[0].get("key")
-        entries = _http_json(GBIF_VERNACULAR.format(key=usage_key)) or []
-        english = [e.get("vernacularName") for e in entries if e.get("language") == "eng"]
+        usage_key = results[0].get("key") if isinstance(results[0], dict) else None
+        if not usage_key:
+            return None
+        page = _http_json(GBIF_VERNACULAR.format(key=usage_key))
+        # The vernacular endpoint returns a paged dict {"results": [...]}.
+        entries = page.get("results", []) if isinstance(page, dict) else (page or [])
+        english = [
+            e["vernacularName"]
+            for e in entries
+            if isinstance(e, dict) and e.get("language") == "eng" and e.get("vernacularName")
+        ]
         return english[0] if english else None
-    except (OSError, ValueError, KeyError) as error:
+    except (OSError, ValueError, KeyError, AttributeError, TypeError) as error:
         logger.warning("GBIF lookup failed for %r: %s", scientific_name, error)
         return None
 
