@@ -36,13 +36,13 @@ Database (requires a PostGIS-enabled Postgres; see below):
   availability calendars (idempotent; safe to re-run)
 - `pnpm test` runs unit tests always; when `TEST_DATABASE_URL` is set it also
   runs the PostGIS integration suite (radius boundary, availability-window
-  flip, iCal double-sync, dedup). CI provisions `postgis/postgis:16` as a
+  flip, iCal double-sync, dedup). CI provisions `postgis/postgis:16-3.5` as a
   service container and sets the variable.
 
 ## PostGIS provisioning
 
 - **CI** — the `stayradar` job in `.github/workflows/ci.yml` starts
-  `postgis/postgis:16` as a service container (`TEST_DATABASE_URL` is set for
+  `postgis/postgis:16-3.5` as a service container (`TEST_DATABASE_URL` is set for
   you).
 - **Local** — run Postgres 16 + PostGIS in Docker when available:
 
