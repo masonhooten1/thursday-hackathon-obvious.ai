@@ -14,7 +14,7 @@ Hackathon monorepo with five projects sharing the repo:
 
 What is bookable tonight in the parks? A terrain map of national-park campgrounds with availability refreshed every 15 minutes by a polite poller and a booking deep link on every result. Spec: Obvious blueprint art_VwFCEgL3.
 
-> **Status: catalog (milestone D2).** Scaffold, shared wire contract, Recreation.gov/RIDB adapters, CI, and the campground catalog are in place. The poller (D4) and map UI (D5) land in follow-up PRs.
+> **Status: catalog merged (D1, D2, D3); map app (D5) in flight.** Scaffold, shared contract, CI, the Recreation.gov/RIDB adapters (PRs #9, #14), and the campground catalog (PR #17) are on `main`. The poller (D4) lands in a follow-up PR; this map app is D5.
 
 ### Structure
 
@@ -22,7 +22,16 @@ What is bookable tonight in the parks? A terrain map of national-park campground
 | --- | --- | --- |
 | `@campground/shared` | `packages/shared` | Zod schemas + TypeScript types for the wire contract (`SiteType`, `Park`, `Campground`, `AvailabilitySnapshot`, `AvailabilityResponse`). Single source of truth — API and app both import it. |
 | `@campground/api` | `services/api` | Hono on Node 20, better-sqlite3 in WAL mode, in-process node-cron scheduler. Owns all external requests. |
-| `@campground/mobile` | `apps/mobile` | Expo + expo-router + TypeScript — iPhone, Android, and web from one codebase. |
+| `@campground/mobile` | `apps/mobile` | Expo + expo-router + TypeScript — iPhone, Android, and web from one codebase. Map-first UI: terrain map with color-coded availability markers, type/date filters, detail sheet, booking deep links. |
+
+### Map app and the Google Maps key
+
+The terrain map needs a billing-enabled Google Maps Platform key, provided
+through env vars and never committed — see [`docs/google-maps.md`](docs/google-maps.md).
+Without a key the web build renders a labeled fallback and native builds omit
+the map config; nothing fails. Until the poller (D4) serves real snapshots,
+the app runs on fixture data (six parks, 18 campgrounds) with an automatic
+switch to the API when `EXPO_PUBLIC_API_BASE_URL` is reachable.
 
 ### Commands (from the repo root)
 

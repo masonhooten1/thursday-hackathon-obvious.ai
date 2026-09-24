@@ -9,10 +9,12 @@ Five projects share this monorepo:
    better-sqlite3 (WAL) and an in-process node-cron poller, shared zod contract. Spec: Obvious
    blueprint art_VwFCEgL3. Scaffold (D1), availability/metadata adapters (D3 — live endpoint
    discovery in `docs/recreation-gov-endpoints.md`, Recreation.gov + RIDB adapters, politeness
-   client), and the campground catalog (D2 — versioned seed in `services/api/seed/`, seeder with
+   client), the campground catalog (D2 — versioned seed in `services/api/seed/`, seeder with
    live facility-id health checks, reproducible generator; provenance in
-   `services/api/seed/README.md`) are done; RIDB live verification is pending a valid API key
-   (see the doc). Poller (D4) and map UI (D5) land next.
+   `services/api/seed/README.md`), and the map app (D5 — fixture data layer, map-first screen,
+   filters, detail sheet, booking links, Google Maps JS/react-native-maps integration) are done;
+   RIDB live verification is pending a valid API key (see the doc). Poller (D4) lands next; the
+   app switches from fixtures to the API when `EXPO_PUBLIC_API_BASE_URL` is reachable.
 2. **Chrome MV3 extension ("LinkedIn to Email")** at the repo root: `manifest.json`, the lookup
    flow (service-worker router, popup state machine, options page, on-profile pill), provider
    adapters, Vitest tooling, a manifest sanity check, and CI. Remaining: visual QA evidence (V6)
@@ -56,6 +58,8 @@ Campground Tonight (from repo root; one `npm install` covers root + all three wo
 - `npm test` — extension Vitest, then per-workspace smoke tests
 - `npm run lint` / `npm run typecheck` — per-workspace fan-out
 - `npm run export:web --workspace=@campground/mobile` — Expo web export to `apps/mobile/dist`
+- `GOOGLE_MAPS_API_KEY` (native config) and `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (web bundle) supply
+  the terrain map key — see `docs/google-maps.md`; builds work without it (labeled web fallback)
 - `npm run dev --workspace=@campground/api` — API on :8787
 - `npm run seed --workspace=@campground/api` — load `services/api/seed/*.json` into SQLite
   (catalog tables replaced atomically), health-checking every facility id against the live
