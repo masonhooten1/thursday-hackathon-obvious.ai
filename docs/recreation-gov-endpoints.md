@@ -128,11 +128,23 @@ MVP spec: unknown site types normalize to `other`, never fail the snapshot).
 ## RIDB metadata endpoint (E2)
 
 `GET https://ridb.recreation.gov/api/v1/facilities/{facilityId}` is the official
-metadata source. Unauthenticated calls return `401 Unauthorized` (live probe,
-2026-09-24); RIDB requires an API key (request header `apikey`), documented at
-50 req/s. The keyed call is verified and its response shape recorded in this file
-once the key is available. Metadata-only degradation mode (spec) applies if either
-source proves unusable.
+metadata source (campsites: `GET /api/v1/facilities/{facilityId}/campsites?limit=&offset=`,
+paginated `{RECDATA, METADATA}` envelope). Unauthenticated calls return
+`401 Unauthorized` (live probe, 2026-09-24); RIDB requires an API key (request
+header `apikey`), documented at 50 req/s.
+
+**Keyed-call status (2026-09-24): blocked on a valid key.** An `RIDB_API_KEY`
+was provided through the secure secrets flow, but the stored value looks like a
+placeholder (7 characters) and the keyed call returned `401 Unauthorized
+Access` — via the `apikey` header and via the `?apikey=` query variant. The
+adapter (`services/api/src/adapters/ridb.ts`) is therefore built against the
+**documented** RIDB schema (facility fields `FacilityID`, `FacilityName`,
+`FacilityLatitude`, `FacilityLongitude`, …; campsite records with
+`CampsiteType`, normalized through the same site-type map as availability),
+with the fixture reconstructed from that schema and community client models —
+its `_provenance` field says so explicitly. Live verification (response shape,
+pagination cap, field drift) must be re-run once a valid key is stored; the
+metadata-only degradation mode (spec) covers the interim.
 
 ## Politeness policy (implemented in the shared client, `services/api/src/adapters`)
 

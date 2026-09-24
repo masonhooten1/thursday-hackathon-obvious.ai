@@ -7,8 +7,10 @@ Five projects share this monorepo:
 1. **Campground Tonight** (`apps/mobile`, `services/api`, `packages/shared` — npm workspaces from the root):
    last-minute campsite availability on a terrain map. Expo + expo-router client, Hono API with
    better-sqlite3 (WAL) and an in-process node-cron poller, shared zod contract. Spec: Obvious
-   blueprint art_VwFCEgL3. Scaffold (D1) is done; catalog (D2), adapters (D3), poller (D4), and
-   map UI (D5) land next.
+   blueprint art_VwFCEgL3. Scaffold (D1) and availability/metadata adapters (D3 — live endpoint
+   discovery in `docs/recreation-gov-endpoints.md`, Recreation.gov + RIDB adapters, politeness
+   client) are done; RIDB live verification is pending a valid API key (see the doc). Catalog
+   (D2), poller (D4), and map UI (D5) land next.
 2. **Chrome MV3 extension ("LinkedIn to Email")** at the repo root: `manifest.json`, the lookup
    flow (service-worker router, popup state machine, options page, on-profile pill), provider
    adapters, Vitest tooling, a manifest sanity check, and CI. Remaining: visual QA evidence (V6)
