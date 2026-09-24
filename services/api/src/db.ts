@@ -12,5 +12,8 @@ export function openDb(filePath: string): Db {
   mkdirSync(dirname(filePath), { recursive: true });
   const db = new Database(filePath);
   db.pragma("journal_mode = WAL");
+  // Catalog rows reference parks; without this pragma SQLite silently
+  // accepts orphaned campground rows.
+  db.pragma("foreign_keys = ON");
   return db;
 }
