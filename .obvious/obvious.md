@@ -13,8 +13,10 @@ Five projects share this monorepo:
    flow (service-worker router, popup state machine, options page, on-profile pill), provider
    adapters, Vitest tooling, a manifest sanity check, and CI. Remaining: visual QA evidence (V6)
    and the live-provider response fixture (V3). Spec: art_n2m5gMDY.
-3. **Plant ID web app** in `web/` (Next.js) and `api/` (FastAPI): placeholder identify screen +
-   `GET /health`. Spec: art_t8aXEd4u.
+3. **Plant ID web app** in `web/` (Next.js) and `api/` (FastAPI): identify screen with the four
+   UI states (upload, identifying, results, low-confidence) + mock-default API client;
+   `GET /health`. Ingestion pipeline lives in `pipeline/` (merged, PR #10); the identify API
+   and eval harness are follow-up PRs (blueprint art_t8aXEd4u).
 4. **SignalPlan** in `signalplan/`: Next.js 15 + TypeScript foundation — frozen Zod contracts
    (`lib/contracts`), Supabase schema + RLS, fail-closed auth, six authenticated API routes,
    Trigger.dev v4 scaffolding. Spec: art_zjmuRNQY.
@@ -92,6 +94,15 @@ StayRadar (from repo root):
   root (extension) config by directory-walk; the root config stays scoped to `src/` and `tests/`
   so root `npm test` never scans `web/` or the workspaces. Root `npm test` chains extension
   Vitest + per-workspace tests — keep that chain intact when adding workspaces.
+- `web/components/IdentifyScreen.tsx` implements the four UI states (upload, identifying,
+  results, low-confidence) plus the error variant per the blueprint; `web/app/page.tsx` only
+  mounts it.
+- API access goes through the `IdentifyClient` seam in `web/lib/api/` — mock by default, live
+  when `NEXT_PUBLIC_API_BASE` is set at build time.
+- `api/app/main.py` only exposes `GET /health`; `/api/identify` arrives with the identify-API
+  PR.
+- Accuracy work (embedder, LanceDB index, thresholds) must stay web-independent — see the
+  plant-ID blueprint's offline-iPhone design rule.
 - SignalPlan: contracts in `signalplan/lib/contracts` are frozen; don't touch root shared files
   (package.json, ci.yml, vitest.config.ts) for SignalPlan-only changes.
 - Conventional commits; CI green before merge; merge method is squash (`.obvious/config.yml`).

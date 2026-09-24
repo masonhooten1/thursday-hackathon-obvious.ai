@@ -7,6 +7,9 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
+    // Globals on so @testing-library/react's auto-cleanup hooks afterEach —
+    // without it, rendered DOM leaks between tests.
+    globals: true,
   },
   resolve: {
     alias: {
