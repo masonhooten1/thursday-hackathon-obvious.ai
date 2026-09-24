@@ -18,6 +18,12 @@ venv/
 models/
 data/
 *.lance/
+
+# --- Campground Tonight env files (secrets stay local; examples are committed) ---
+.env
+.env.local
+services/api/data/
+apps/mobile/dist/
 *.pt
 *.onnx
 *.gguf
