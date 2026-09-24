@@ -3,7 +3,6 @@ import { runStatusFromCompanies, companyStatusAfterError } from "@/lib/workers/o
 import { SeamNotIntegratedError } from "@/trigger/seams";
 import { runCompany } from "@/trigger/run-company";
 import { runBatch } from "@/trigger/run-batch";
-import { InMemoryRepository } from "@/lib/repositories/in-memory";
 import { makeTestUsers } from "./helpers/session-stubs";
 import { randomUUID } from "node:crypto";
 
@@ -83,6 +82,9 @@ describe("runCompany", () => {
       async () => {
         throw new SeamNotIntegratedError("collector");
       },
+      async () => {
+        throw new Error("analysis must not run after a collector failure");
+      },
     );
     expect(status).toEqual({ companyId: companyIds[0], status: "blocked" });
     const companies = await users.repo.getRunCompanies(users.workspaceA, runId);
@@ -101,6 +103,9 @@ describe("runCompany", () => {
         async () => {
           throw new Error("DNS resolution failed");
         },
+        async () => {
+          throw new Error("analysis must not run after a collector failure");
+        },
       ),
     ).rejects.toThrow("DNS resolution failed");
     const companies = await users.repo.getRunCompanies(users.workspaceA, runId);
@@ -118,6 +123,9 @@ describe("runCompany", () => {
           { runId, workspaceId: users.workspaceA, companyId, domain: "example.com" },
           users.repo,
           failing,
+          async () => {
+            throw new Error("analysis must not run after a collector failure");
+          },
         ),
       ),
     );
@@ -177,6 +185,8 @@ describe("runBatch", () => {
       },
     );
     expect(enqueued).toEqual(ids);
-    expect(users.repo.tables.runs[0].status).toBe("failed"); // nothing ready yet
+    // Companies just fanned out are in flight, not terminal — the run stays
+    // `running` until company tasks land their outcomes (durability, check 11).
+    expect(users.repo.tables.runs[0].status).toBe("running");
   });
 });

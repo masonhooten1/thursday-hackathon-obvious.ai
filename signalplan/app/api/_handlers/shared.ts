@@ -7,7 +7,9 @@ export type RouteDeps = {
   sessionStore: SessionStore;
   repository: SignalPlanRepository;
   /** Wired to Trigger.dev in production; tests record calls. */
-  enqueueRun?: (runId: string) => Promise<void>;
+  enqueueRun?: (workspaceId: string, runId: string) => Promise<void>;
+  /** Wired to Trigger.dev in production; tests record calls. */
+  dispatchExport?: (payload: { exportId: string; workspaceId: string; html: string }) => Promise<void>;
 };
 
 export type RouteContext = { params: Promise<Record<string, string>> };

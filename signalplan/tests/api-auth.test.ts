@@ -19,15 +19,14 @@ import type { Campaign } from "@/lib/contracts";
 let users: TestUsers;
 let deps: RouteDeps;
 const enqueuedRunIds: string[] = [];
-
 beforeEach(() => {
   users = makeTestUsers();
   enqueuedRunIds.length = 0;
   deps = {
     sessionStore: stubSessionStore(users.tokens),
     repository: users.repo,
-    enqueueRun: async (runId) => {
-      enqueuedRunIds.push(runId);
+    enqueueRun: async (workspaceId, runId) => {
+      enqueuedRunIds.push(`${workspaceId}:${runId}`);
     },
   };
 });
@@ -168,7 +167,7 @@ describe("run creation (acceptance checks 5 and 8)", () => {
     const body = await res.json();
     expect(body.run.status).toBe("queued");
     expect(body.run.companiesTotal).toBe(3); // deduped case-insensitively; www. is distinct
-    expect(enqueuedRunIds).toEqual([body.run.id]);
+    expect(enqueuedRunIds).toEqual([`${users.workspaceA}:${body.run.id}`]);
 
     const status = await createRunStatusRoutes(deps).GET(
       authedRequest(`http://localhost:3000/api/runs/${body.run.id}`, users.tokenA, {

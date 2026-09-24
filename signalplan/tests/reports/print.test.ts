@@ -96,14 +96,53 @@ describe("printHtmlToPdf — two-page guarantee (check 6)", () => {
 });
 
 describe("printExportCore", () => {
-  it("passes template HTML to the print function and reports the byte length", async () => {
+  it("prints, stores, and marks the export ready with its storage key", async () => {
     let received = "";
     const print = async (html: string) => {
       received = html;
       return new Uint8Array([37, 80, 68, 70]); // %PDF
     };
-    const result = await printExportCore({ exportId: "exp_1", html: "<html>plan</html>" }, print);
+    const updates: { status: string; storageKey?: string }[] = [];
+    const repo = { setExportStatus: async (_w: string, _e: string, u: { status: string; storageKey?: string }) => { updates.push(u); } } as never;
+    const result = await printExportCore(
+      { exportId: "exp_1", workspaceId: "ws", html: "<html>plan</html>" },
+      print,
+      repo,
+      async () => "exports/exp_1.pdf",
+    );
     expect(received).toBe("<html>plan</html>");
-    expect(result).toEqual({ exportId: "exp_1", byteLength: 4 });
+    expect(result).toEqual({ exportId: "exp_1", byteLength: 4, storageKey: "exports/exp_1.pdf" });
+    expect(updates).toEqual([{ status: "ready", storageKey: "exports/exp_1.pdf" }]);
+  });
+
+  it("marks the export failed and rethrows when printing fails", async () => {
+    const updates: { status: string; error?: string }[] = [];
+    const repo = { setExportStatus: async (_w: string, _e: string, u: { status: string; error?: string }) => { updates.push(u); } } as never;
+    const print = async (): Promise<Uint8Array> => {
+      throw new Error("chromium crashed");
+    };
+    await expect(
+      printExportCore(
+        { exportId: "exp_2", workspaceId: "ws", html: "<html/>" },
+        print,
+        repo,
+        async () => "exports/exp_2.pdf",
+      ),
+    ).rejects.toThrow("chromium crashed");
+    expect(updates[0].status).toBe("failed");
+  });
+
+  it("fails the export when storage is unavailable instead of faking readiness", async () => {
+    const updates: { status: string; error?: string }[] = [];
+    const repo = { setExportStatus: async (_w: string, _e: string, u: { status: string; error?: string }) => { updates.push(u); } } as never;
+    await expect(
+      printExportCore(
+        { exportId: "exp_3", workspaceId: "ws", html: "<html/>" },
+        async () => new Uint8Array([1]),
+        repo,
+        async () => null,
+      ),
+    ).rejects.toThrow("Private storage is not configured");
+    expect(updates[0].status).toBe("failed");
   });
 });

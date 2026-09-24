@@ -87,7 +87,8 @@ function mapCompany(r: Row): Company {
   };
 }
 
-function mapEvidence(r: Row): Evidence {
+/** Exported for the worker repository's evidence reads (same row shape). */
+export function mapEvidenceRow(r: Row): Evidence {
   return {
     id: str(r.id),
     companyId: str(r.company_id),
@@ -99,6 +100,10 @@ function mapEvidence(r: Row): Evidence {
     snapshotRef: (r.snapshot_ref as string | null) ?? undefined,
     limitations: strArray(r.limitations),
   };
+}
+
+function mapEvidence(r: Row): Evidence {
+  return mapEvidenceRow(r);
 }
 
 function mapFinding(r: Row): Finding {
