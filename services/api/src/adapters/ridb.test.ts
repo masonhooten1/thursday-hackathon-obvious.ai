@@ -131,16 +131,12 @@ describe("RidbMetadataSource", () => {
     const { source, requests } = sourceFor(3);
     await source.fetchFacility(232490);
     expect(requests).toHaveLength(4); // facility + 3 campsite pages
-    expect(requests[0].url).toBe("https://ridb.recreation.gov/api/v1/facilities/232490");
-    expect(requests[1].url).toBe(
+    expect(requests.map((request) => request.url)).toEqual([
+      "https://ridb.recreation.gov/api/v1/facilities/232490",
       "https://ridb.recreation.gov/api/v1/facilities/232490/campsites?limit=3&offset=0",
-    );
-    expect(requests[2].url).toBe(
       "https://ridb.recreation.gov/api/v1/facilities/232490/campsites?limit=3&offset=3",
-    );
-    expect(requests[3].url).toBe(
       "https://ridb.recreation.gov/api/v1/facilities/232490/campsites?limit=3&offset=6",
-    );
+    ]);
   });
 
   it("propagates source failures instead of fabricating data", async () => {

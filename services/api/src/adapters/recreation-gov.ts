@@ -41,9 +41,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * through the night `nights - 1` days later.
  */
 export function windowDates(windowStart: string, nights: number): string[] {
-  const parts = windowStart.split("-").map(Number);
-  const [year, month, day] = parts;
-  if (parts.length !== 3 || [year, month, day].some((n) => n === undefined || Number.isNaN(n))) {
+  const [year, month, day] = windowStart.split("-").map(Number);
+  // Individual checks (not .some) so TypeScript narrows the destructured parts.
+  if (year === undefined || month === undefined || day === undefined ||
+      [year, month, day].some(Number.isNaN)) {
     throw new Error(`invalid windowStart: ${windowStart}`);
   }
   const firstNight = Date.UTC(year, month - 1, day);
@@ -101,8 +102,9 @@ function buildSnapshot(input: {
   let totalSites = 0;
   for (const site of sites) {
     totalSites += 1;
+    const counts = byType[site.type];
     dates.forEach((date, index) => {
-      if (site.availableDates.has(date)) byType[site.type][index] += 1;
+      if (site.availableDates.has(date)) counts[index] = (counts[index] ?? 0) + 1;
     });
   }
   return {

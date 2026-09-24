@@ -40,12 +40,19 @@ function harness(responses: Array<Response | Error>, now: () => number = () => D
   return { client, calls, sleeps };
 }
 
+/** Call headers by call index — throws (failing the test) if the call is absent. */
+function callHeaders(h: Harness, index: number): Record<string, string> {
+  const call = h.calls[index];
+  if (!call) throw new Error(`expected a call at index ${index}`);
+  return call[1].headers as Record<string, string>;
+}
+
 describe("PoliteClient", () => {
   it("sends an identifying User-Agent and JSON Accept on every request", async () => {
     const h = harness([ok()]);
     await h.client.getJson(RECREATION_URL);
     expect(h.calls).toHaveLength(1);
-    const headers = h.calls[0][1].headers as Record<string, string>;
+    const headers = callHeaders(h, 0);
     expect(headers["User-Agent"]).toBe(UA);
     expect(headers["Accept"]).toBe("application/json");
   });
@@ -53,7 +60,7 @@ describe("PoliteClient", () => {
   it("merges per-request headers over the base set (RIDB apikey)", async () => {
     const h = harness([ok()]);
     await h.client.getJson(RIDB_URL, { apikey: "test-key" });
-    const headers = h.calls[0][1].headers as Record<string, string>;
+    const headers = callHeaders(h, 0);
     expect(headers.apikey).toBe("test-key");
     // The extra header must not displace the identifying base headers.
     expect(headers["User-Agent"]).toBe(UA);
