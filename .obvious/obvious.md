@@ -103,7 +103,7 @@ StayRadar (from repo root):
 - `pnpm --dir stayradar db:migrate` / `pnpm --dir stayradar db:seed` — apply
   migrations and upsert the 40-property seed inventory (idempotent); need a
   PostGIS Postgres. Integration tests run when `TEST_DATABASE_URL` is set
-  (CI: `postgis/postgis:16` service container; local path in
+  (CI: `postgis/postgis:16-3.5` service container; local path in
   `stayradar/README.md`).
 
 ## Conventions & handoff
