@@ -1,9 +1,10 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { NextRequest } from "next/server";
 import { GET as exportRoute } from "@/app/api/campaigns/[id]/export/route";
 import { GET as listRoute } from "@/app/api/campaigns/route";
 import { POST as generateRoute } from "@/app/api/campaigns/generate/route";
-import { createDb } from "@/db";
+import { getRequestDb } from "@/db/request-db";
 import { applyMigrations, truncateAll } from "@/db/apply-migrations";
 import { leads, properties, searchEvents } from "@/db/schema";
 import { MockGoogleAdsClient } from "@/lib/services/marketing/ads-client";
@@ -14,7 +15,6 @@ import {
   getCampaign,
   listCampaigns,
 } from "@/lib/services/marketing/campaign-service";
-import { getMarketingDb } from "@/lib/services/marketing/connection";
 import type { CampaignConfig } from "@/lib/services/marketing/schemas";
 import { ingestProperties } from "@/lib/services/ingestion/ingest";
 import { SeedConnector } from "@/lib/services/ingestion/seed-connector";
@@ -27,13 +27,15 @@ import { SeedConnector } from "@/lib/services/ingestion/seed-connector";
  */
 const databaseUrl = process.env.TEST_DATABASE_URL;
 
+/** Route handlers draw from the shared lazy pool — tests borrow the same one. */
+type RouteDb = ReturnType<typeof getRequestDb> & { $client: { end(): Promise<void> } };
+
 describe.skipIf(!databaseUrl)("marketing engine persistence", () => {
-  // ReturnType carries the `$client` pool handle that createDb attaches.
-  let db: ReturnType<typeof createDb>;
+  let db: RouteDb;
   let lakeTahoePropertyId: string;
 
   beforeAll(async () => {
-    db = createDb(databaseUrl as string);
+    db = getRequestDb() as RouteDb;
     await applyMigrations(db);
     await truncateAll(db);
 
@@ -74,8 +76,7 @@ describe.skipIf(!databaseUrl)("marketing engine persistence", () => {
   });
 
   afterAll(async () => {
-    // Two pools exist: the test's own and the route handlers' lazy singleton.
-    await Promise.all([db.$client.end(), getMarketingDb().$client.end()]);
+    await db.$client.end();
   });
 
   describe("generateCampaign", () => {
@@ -147,7 +148,7 @@ describe.skipIf(!databaseUrl)("marketing engine persistence", () => {
   describe("campaign routes", () => {
     it("POST /api/campaigns/generate → 201 with the persisted campaign", async () => {
       const response = await generateRoute(
-        new Request("http://localhost/api/campaigns/generate", {
+        new NextRequest("http://localhost/api/campaigns/generate", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ market: "lake-tahoe" }),
@@ -160,7 +161,7 @@ describe.skipIf(!databaseUrl)("marketing engine persistence", () => {
 
     it("POST /api/campaigns/generate → 400 malformed JSON, 400 below the radius floor, 404 unknown market", async () => {
       const badJson = await generateRoute(
-        new Request("http://localhost/api/campaigns/generate", {
+        new NextRequest("http://localhost/api/campaigns/generate", {
           method: "POST",
           body: "not-json",
         }),
@@ -168,28 +169,36 @@ describe.skipIf(!databaseUrl)("marketing engine persistence", () => {
       expect(badJson.status).toBe(400);
 
       const badBody = await generateRoute(
-        new Request("http://localhost/api/campaigns/generate", {
+        new NextRequest("http://localhost/api/campaigns/generate", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ market: "lake-tahoe", radiusMeters: 500 }),
         }),
       );
       expect(badBody.status).toBe(400);
-      const badBodyJson = (await badBody.json()) as { error: string; issues: { message: string }[] };
-      expect(badBodyJson.issues.map((issue) => issue.message).join(" ")).toMatch(/1 km/);
+      const badBodyJson = (await badBody.json()) as {
+        error: { code: string; message: string; details: { message: string }[] };
+      };
+      expect(badBodyJson.error.code).toBe("bad_request");
+      expect(badBodyJson.error.details.map((issue) => issue.message).join(" ")).toMatch(/1 km/);
 
       const unknownMarket = await generateRoute(
-        new Request("http://localhost/api/campaigns/generate", {
+        new NextRequest("http://localhost/api/campaigns/generate", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ market: "nowhere" }),
         }),
       );
       expect(unknownMarket.status).toBe(404);
+      expect(((await unknownMarket.json()) as { error: { code: string } }).error.code).toBe(
+        "not_found",
+      );
     });
 
     it("GET /api/campaigns lists stored campaigns", async () => {
-      const response = await listRoute(new Request("http://localhost/api/campaigns?market=lake-tahoe"));
+      const response = await listRoute(
+        new NextRequest("http://localhost/api/campaigns?market=lake-tahoe"),
+      );
       expect(response.status).toBe(200);
       const body = (await response.json()) as { campaigns: { market: string }[] };
       expect(body.campaigns.length).toBeGreaterThanOrEqual(2);
@@ -228,13 +237,15 @@ describe.skipIf(!databaseUrl)("marketing engine persistence", () => {
 
     it("GET /api/campaigns/[id]/export → 404 for malformed and unknown ids", async () => {
       const badId = await exportRoute(
-        new Request("http://localhost/api/campaigns/not-a-uuid/export"),
+        new NextRequest("http://localhost/api/campaigns/not-a-uuid/export"),
         { params: Promise.resolve({ id: "not-a-uuid" }) },
       );
       expect(badId.status).toBe(404);
 
       const missing = await exportRoute(
-        new Request("http://localhost/api/campaigns/00000000-0000-0000-0000-000000000000/export"),
+        new NextRequest(
+          "http://localhost/api/campaigns/00000000-0000-0000-0000-000000000000/export",
+        ),
         { params: Promise.resolve({ id: "00000000-0000-0000-0000-000000000000" }) },
       );
       expect(missing.status).toBe(404);
