@@ -2,84 +2,95 @@
 
 ## Repo status
 
-Three projects share this monorepo:
+Five projects share this monorepo:
 
-1. **Chrome MV3 extension ("LinkedIn to Email")** at the repo root: `manifest.json`, placeholder
-   source files, Vitest tooling, a manifest sanity check, and CI. Feature code — URL capture,
-   provider adapters, popup/options UI — lands in later tasks; placeholders stand in until then.
-   Spec: Obvious blueprint art_n2m5gMDY.
-2. **Plant ID web app** in `web/` (Next.js) and `api/` (FastAPI): placeholder identify screen +
-   `GET /health`. Ingestion, identify API, real UI states, and the eval harness are follow-up
-   PRs (blueprint art_t8aXEd4u).
-3. **SignalPlan** (marketing-audit app) in `signalplan/`: Next.js 15 + TypeScript foundation —
-   frozen Zod contracts (`lib/contracts`), Supabase schema + RLS (`db/schema.sql`), fail-closed
-   auth, the six authenticated API routes, Trigger.dev v4 scaffolding, and a full test suite.
-   Collector, intelligence, and interface modules land in follow-up PRs (spec: Obvious
-   blueprint art_zjmuRNQY, brief art_aQLkJ0vZ).
+1. **Campground Tonight** (`apps/mobile`, `services/api`, `packages/shared` — npm workspaces from the root):
+   last-minute campsite availability on a terrain map. Expo + expo-router client, Hono API with
+   better-sqlite3 (WAL) and an in-process node-cron poller, shared zod contract. Spec: Obvious
+   blueprint art_VwFCEgL3. Scaffold (D1) is done; catalog (D2), adapters (D3), poller (D4), and
+   map UI (D5) land next.
+2. **Chrome MV3 extension ("LinkedIn to Email")** at the repo root: `manifest.json`, Vitest
+   tooling, a manifest sanity check, and CI. Feature code lands in later tasks; placeholders stand
+   in until then. Spec: art_n2m5gMDY.
+3. **Plant ID web app** in `web/` (Next.js) and `api/` (FastAPI): placeholder identify screen +
+   `GET /health`. Spec: art_t8aXEd4u.
+4. **SignalPlan** in `signalplan/`: Next.js 15 + TypeScript foundation — frozen Zod contracts
+   (`lib/contracts`), Supabase schema + RLS, fail-closed auth, six authenticated API routes,
+   Trigger.dev v4 scaffolding. Spec: art_zjmuRNQY.
+5. **StayRadar** in `stayradar/`: Next.js (pnpm) static search shell with fixtures.
 
 ## Stack
 
+- **Campground Tonight** — npm workspaces (`apps/*`, `services/*`, `packages/*`) on the root
+  lockfile. Expo SDK 57 (React Native + TypeScript), Hono + @hono/node-server on Node 20,
+  better-sqlite3 12.x in WAL mode (v13 dropped Node 20), node-cron in-process, zod v4, Vitest per
+  workspace, ESLint flat configs per workspace.
 - **Extension (repo root)** — Chrome Manifest V3, vanilla JS ES modules, no bundler. Node 20
   tooling; Vitest for unit tests; no runtime dependencies. npm + `package-lock.json`.
-- **web/** — Next.js (App Router) + TypeScript + React 19, pnpm for packages. Vitest +
-  Testing Library (jsdom) for component tests, ESLint (`eslint-config-next`, flat config) for
-  lint, Prettier for format.
-- **api/** — FastAPI + uvicorn, Python 3.13 venv at `api/.venv`. Pytest + httpx (TestClient)
-  for tests. Ruff (lint + format) configured in the root `pyproject.toml`, pinned in
-  `api/requirements-dev.txt` — not yet CI-gated.
-- **CI** — `.github/workflows/ci.yml` runs extension (`npm ci` → Vitest → check:manifest),
-  web (frozen pnpm install → ESLint → Vitest), and api (pip install → pytest) jobs; SignalPlan
-  has its own path-scoped workflow (`.github/workflows/signalplan.yml`: npm ci → ESLint →
-  tsc → Vitest with a Postgres service for RLS tests → Next build). No model or dataset
-  downloads in CI by design.
+- **web/** — Next.js (App Router) + TypeScript + React 19, pnpm for packages. Vitest + Testing
+  Library (jsdom) for component tests, ESLint (`eslint-config-next`, flat config), Prettier.
+- **api/** — FastAPI + uvicorn, Python 3.13 venv at `api/.venv`. Pytest + httpx (TestClient).
+  Ruff (lint + format) in the root `pyproject.toml`, pinned in `api/requirements-dev.txt` — not
+  yet CI-gated.
+- **SignalPlan** — own package-lock and CI workflow; RLS tests need real Postgres.
+- **StayRadar** — own pnpm lockfile; built in the shared `ci.yml` lane.
+- **CI** — `.github/workflows/ci.yml` (extension + web + api + stayradar),
+  `.github/workflows/signalplan.yml` (lint → tsc → Vitest with a Postgres service → Next build),
+  `.github/workflows/campground.yml` (lint + typecheck + tests + Expo web export).
 
 ## Commands
 
+Campground Tonight (from repo root; one `npm install` covers root + all three workspaces):
+
+- `npm test` — extension Vitest, then per-workspace smoke tests
+- `npm run lint` / `npm run typecheck` — per-workspace fan-out
+- `npm run export:web --workspace=@campground/mobile` — Expo web export to `apps/mobile/dist`
+- `npm run dev --workspace=@campground/api` — API on :8787
+- `npm start --workspace=@campground/mobile` — Expo dev server
+
 Extension (repo root):
 
-- `npm install` — install dev dependencies
-- `npm test` — run the Vitest suite
-- `npm run check:manifest` — validate `manifest.json` (required keys, referenced files)
-- Local verification: load the repo root unpacked at `chrome://extensions` (see README)
+- `npm install`
+- `npm test`
+- `npm run check:manifest`
 
 Web (from repo root):
 
-- `pnpm --dir web install` — install deps
-- `pnpm --dir web dev` — dev server on :3000
+- `pnpm --dir web install` / `pnpm --dir web dev` (:3000)
 - `pnpm --dir web lint` / `pnpm --dir web test` / `pnpm --dir web build` / `pnpm --dir web format:check`
 
 API (from repo root):
 
 - `python3 -m venv api/.venv && source api/.venv/bin/activate && pip install -r api/requirements.txt`
-- `pytest` — full suite (root `pyproject.toml` sets `pythonpath`/`testpaths`);
-  `pytest api/tests/test_health.py` for the health endpoint only
-- `cd api && uvicorn app.main:app --reload` — dev server on :8000
+- `pytest` (root `pyproject.toml` sets `pythonpath`/`testpaths`)
+- `cd api && uvicorn app.main:app --reload` (:8000)
 
 SignalPlan (from repo root):
 
-- `cd signalplan && npm install` — install deps
+- `cd signalplan && npm install`
 - `cd signalplan && npm run lint` / `npx tsc --noEmit` / `npx vitest run` / `npm run build`
 - RLS + worker-repo tests need real Postgres:
   `TEST_DATABASE_URL="postgresql://user@127.0.0.1:54322/postgres" npx vitest run` from `signalplan/`
-- Vercel Root Directory for this app: `signalplan` (set at deploy time)
 
-Verify before pushing: extension `npm test && npm run check:manifest`; web + api
-`pnpm --dir web lint && pnpm --dir web test && pytest`.
+StayRadar (from repo root):
 
-## Handoff
+- `pnpm --dir stayradar install` / `pnpm --dir stayradar lint` / `pnpm --dir stayradar test` / `pnpm --dir stayradar build`
 
-- Extension: provider adapters must keep the normalized-result contract described in the
-  extension project spec (Obvious blueprint art_n2m5gMDY).
-- Root `vitest.config.ts` scopes root Vitest to the extension's `src/` and `tests/` so root
-  `npm test` never scans `web/` — keep that boundary when adding extension tests.
-- `web/app/page.tsx` is a deliberate placeholder; the four real UI states (upload,
-  identifying, results, low-confidence) land with the UI PR per the blueprint.
-- `api/app/main.py` only exposes `GET /health`; `/api/identify` arrives with the identify-API
-  PR.
-- SignalPlan: contracts in `signalplan/lib/contracts` are frozen — parallel module tasks build
-  against them; not-yet-integrated worker seams (`signalplan/trigger/seams.ts`) mark companies
-  `blocked`, never ready with fabricated evidence. Do not touch root shared files (package.json,
-  ci.yml, vitest.config.ts) for SignalPlan changes — everything lives under `signalplan/`.
-- Accuracy work (embedder, LanceDB index, thresholds) must stay web-independent — see the
-  plant-ID blueprint's offline-iPhone design rule. `.gitignore` already excludes model
-  weights, `*.lance/`, and `eval.json`.
+## Conventions & handoff
+
+- **Contract discipline:** wire-format changes go through `packages/shared/src/contract.ts`
+  (zod schemas are the source of truth; types are inferred from them). The API and the app must
+  not hand-roll their own shapes.
+- **Politeness:** only `services/api` touches Recreation.gov/RIDB. When the availability adapter
+  lands (D3), it keeps one request in flight per host, spaces requests, sends an identifying
+  User-Agent, backs off exponentially on 429/5xx, and never retries a 403 (a block is a signal,
+  not an error to hammer).
+- **Degradation:** metadata-only mode is a designed state — if the availability endpoint proves
+  unusable, ship map, filters, booking links, and an honest "availability unknown" state.
+- **Vitest boundaries:** every workspace has its own `vitest.config.ts` so nothing inherits the
+  root (extension) config by directory-walk; the root config stays scoped to `src/` and `tests/`
+  so root `npm test` never scans `web/` or the workspaces. Root `npm test` chains extension
+  Vitest + per-workspace tests — keep that chain intact when adding workspaces.
+- SignalPlan: contracts in `signalplan/lib/contracts` are frozen; don't touch root shared files
+  (package.json, ci.yml, vitest.config.ts) for SignalPlan-only changes.
+- Conventional commits; CI green before merge; merge method is squash (`.obvious/config.yml`).
