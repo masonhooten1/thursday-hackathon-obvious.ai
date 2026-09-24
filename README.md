@@ -60,7 +60,7 @@ A Chrome (Manifest V3) extension that resolves the LinkedIn profile you are view
 
 Bring your own enrichment key: lookups go straight from your browser to Prospeo (default) or Hunter. Your key, your credits, your account. Results are shown and copied, never stored.
 
-> **Status: scaffold.** The manifest, CI, and tooling are in place. Placeholder files stand in for the lookup flow, popup, and options page, which land in later tasks.
+> **Status: functional.** The lookup flow is implemented end to end: service-worker router, provider adapters, popup state machine, options page, and the on-profile pill. Remaining: visual QA evidence (V6, its own task) and pinning the live provider response fixture (V3, first run with a real key).
 
 ### How it works
 
@@ -74,7 +74,7 @@ Bring your own enrichment key: lookups go straight from your browser to Prospeo 
 2. Open `chrome://extensions` in Chrome.
 3. Turn on **Developer mode** (top right).
 4. Click **Load unpacked** and select this repo's root folder (the directory containing `manifest.json`).
-5. Pin the extension and open **Options** to add your enrichment API key. (The options UI is a placeholder until the settings task lands.)
+5. Pin the extension and open **Options** to add your enrichment API key.
 
 ### Development
 

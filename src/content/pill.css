@@ -1,1 +1,35 @@
-/* Placeholder styles — the profile pill styles arrive in a later task. */
+/* The on-profile pill (spec §What happens on a lookup) — fixed bottom-right,
+   unobtrusive; the lte- prefix keeps LinkedIn's own styles from colliding. */
+
+.lte-pill {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  padding: 8px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+  background: #fff;
+  color: rgba(0, 0, 0, 0.85);
+  font: 500 13px/1.2 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  user-select: none;
+}
+
+.lte-pill--busy {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.lte-pill--found {
+  border-color: #1a7f37;
+  color: #1a7f37;
+  font-weight: 600;
+}
+
+.lte-pill--miss,
+.lte-pill--error {
+  border-color: #b3261e;
+  color: #b3261e;
+}

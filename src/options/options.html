@@ -3,9 +3,30 @@
   <head>
     <meta charset="utf-8" />
     <title>LinkedIn to Email — Options</title>
+    <link rel="stylesheet" href="options.css" />
+    <script type="module" src="options.js"></script>
   </head>
   <body>
-    <!-- Options UI (provider select, API key input) arrives in a later task. -->
-    <p>Options UI lands in a later task.</p>
+    <main>
+      <h1>LinkedIn to Email</h1>
+      <p class="hint">
+        Your key is stored locally in Chrome and sent only to the selected
+        provider's API.
+      </p>
+
+      <label class="field">
+        <span class="field-label">Provider</span>
+        <select id="select-provider"></select>
+      </label>
+
+      <label class="field">
+        <span class="field-label">API key</span>
+        <input id="input-key" type="password" spellcheck="false" autocomplete="off" placeholder="Paste your key" />
+      </label>
+      <p class="error" id="key-error" hidden></p>
+
+      <button id="btn-save" type="button">Save</button>
+      <p class="meta" id="saved-note" role="status"></p>
+    </main>
   </body>
 </html>

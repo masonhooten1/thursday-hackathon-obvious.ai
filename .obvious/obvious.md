@@ -9,9 +9,10 @@ Five projects share this monorepo:
    better-sqlite3 (WAL) and an in-process node-cron poller, shared zod contract. Spec: Obvious
    blueprint art_VwFCEgL3. Scaffold (D1) is done; catalog (D2), adapters (D3), poller (D4), and
    map UI (D5) land next.
-2. **Chrome MV3 extension ("LinkedIn to Email")** at the repo root: `manifest.json`, Vitest
-   tooling, a manifest sanity check, and CI. Feature code lands in later tasks; placeholders stand
-   in until then. Spec: art_n2m5gMDY.
+2. **Chrome MV3 extension ("LinkedIn to Email")** at the repo root: `manifest.json`, the lookup
+   flow (service-worker router, popup state machine, options page, on-profile pill), provider
+   adapters, Vitest tooling, a manifest sanity check, and CI. Remaining: visual QA evidence (V6)
+   and the live-provider response fixture (V3). Spec: art_n2m5gMDY.
 3. **Plant ID web app** in `web/` (Next.js) and `api/` (FastAPI): placeholder identify screen +
    `GET /health`. Spec: art_t8aXEd4u.
 4. **SignalPlan** in `signalplan/`: Next.js 15 + TypeScript foundation — frozen Zod contracts
