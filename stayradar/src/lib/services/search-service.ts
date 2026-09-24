@@ -102,6 +102,14 @@ export async function searchProperties(
     )
     AND p.max_guests >= ${q.guests}
     AND (${q.propertyType ?? null}::text IS NULL OR p.property_type = ${q.propertyType ?? null}::text)
+    -- Availability-window disqualification: a booked/blocked night inside the
+    -- requested window removes the property from the result set entirely.
+    AND NOT EXISTS (
+      SELECT 1 FROM availability bad
+      WHERE bad.property_id = p.id
+        AND bad.date BETWEEN ${q.checkIn} AND ${q.checkOut}
+        AND bad.status <> 'available'
+    )
     GROUP BY p.id
     ORDER BY distance_miles ASC
   `);
