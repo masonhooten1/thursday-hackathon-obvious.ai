@@ -16,8 +16,7 @@ function parseMatch(value: unknown, baseUrl: string): Match {
   if (!isRecord(value)) {
     throw new IdentifyError(502, "identify API sent a match that is not an object");
   }
-  const { species_id, scientific_name, common_name, distance, confidence, reference_image } =
-    value;
+  const { species_id, scientific_name, common_name, distance, confidence, reference_image } = value;
   if (typeof species_id !== "string" || typeof scientific_name !== "string") {
     throw new IdentifyError(502, "identify API match is missing required string fields");
   }
