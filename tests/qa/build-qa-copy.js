@@ -1,0 +1,156 @@
+// Builds a test-only copy of the extension for browser QA (spec V6):
+//
+//   node tests/qa/build-qa-copy.js --source <repo-root> --target <dir>
+//
+// The copy is identical to the repo's extension plus three narrow, generated
+// test hooks (documented in the PR and README — none of this ships):
+//   1. src/background/qa-endpoints.js — sets the adapters' endpoint overrides
+//      (globalThis.__PROSPEO_ENDPOINT__ / __HUNTER_ENDPOINT__) at the local
+//      stub, exercising the override hooks shipped in src/providers/*.js.
+//   2. manifest host_permissions += the stub API origin — so the service
+//      worker may fetch it. The shipped manifest keeps only provider origins.
+//   3. manifest content_scripts matches += the stub page origin — so the pill
+//      can be exercised on a local stand-in for a profile page.
+// An optional --key-file pins the unpacked extension ID (stable across
+// relaunches); the key is generated once and stored outside the repo.
+
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import crypto from 'node:crypto';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+function argValue(flag) {
+  const index = process.argv.indexOf(flag);
+  return index !== -1 && process.argv[index + 1] ? process.argv[index + 1] : null;
+}
+
+/**
+ * Build a test-only copy of the extension with the QA hooks. Pure over its
+ * inputs (writes only under `target`) so tests can assert on the output.
+ *
+ * @param {{ source: string, target: string, keyFile?: string|null,
+ *           apiOrigin?: string, pageOrigin?: string }} options
+ * @returns {{ extensionId: string | null }}
+ */
+export function buildQaCopy({ source, target, keyFile = null, apiOrigin = 'http://127.0.0.1:8899', pageOrigin = 'http://127.0.0.1:8898' }) {
+if (!source || !target || !existsSync(path.join(source, 'manifest.json'))) {
+  throw new Error('buildQaCopy: --source (repo root) and --target are required');
+}
+
+// --- pinned extension ID ----------------------------------------------------
+// Chrome derives an unpacked extension's ID from the manifest "key" (base64
+// SPKI). Without one the ID follows the path and changes per rebuild; a stored
+// key keeps captures' chrome-extension:// URLs stable across sessions.
+let keyB64 = null;
+if (keyFile) {
+  if (existsSync(keyFile)) {
+    keyB64 = readFileSync(keyFile, 'utf8').trim();
+  } else {
+    const { publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const spki = publicKey.export({ type: 'spki', format: 'der' });
+    keyB64 = spki.toString('base64');
+    writeFileSync(keyFile, keyB64, { mode: 0o600 });
+    console.log(`[qa] generated pinned key → ${keyFile}`);
+  }
+}
+
+function extensionId(spkiB64) {
+  const hash = crypto.createHash('sha256').update(Buffer.from(spkiB64, 'base64')).digest('hex');
+  // Chrome's ID mapping: first 16 bytes of SHA-256, hex digits 0-f → a-p.
+  return hash
+    .slice(0, 32)
+    .split('')
+    .map((c) => 'abcdefghijklmnop'[parseInt(c, 16)])
+    .join('');
+}
+
+// --- copy + patch -----------------------------------------------------------
+mkdirSync(target, { recursive: true });
+cpSync(path.join(source, 'src'), path.join(target, 'src'), { recursive: true });
+
+const manifestPath = path.join(target, 'manifest.json');
+cpSync(path.join(source, 'manifest.json'), manifestPath);
+const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+
+if (keyB64) manifest.key = keyB64;
+
+// (2) the stub API origin, and nothing wider.
+manifest.host_permissions = [...new Set([...manifest.host_permissions, `${apiOrigin}/*`])];
+
+// (3) the stub page origin's /in/* paths, next to the shipped LinkedIn match.
+manifest.content_scripts = manifest.content_scripts.map((cs) => ({
+  ...cs,
+  matches: [...new Set([...cs.matches, `${pageOrigin}/in/*`])],
+}));
+
+// (3b) the web-accessible pill modules must also load from the stub page, or
+// the bootstrap's dynamic import is blocked on the local stand-in.
+if (manifest.web_accessible_resources) {
+  manifest.web_accessible_resources = manifest.web_accessible_resources.map((war) => ({
+    ...war,
+    matches: [...new Set([...war.matches, `${pageOrigin}/*`])],
+  }));
+}
+
+// (3c) the pill's click-time re-validation removes the pill when the host is
+// not linkedin.com (correct shipped behavior — a client-side navigation away
+// must not spend a lookup). The local stand-in page lives on 127.0.0.1, so the
+// disposable copy accepts that one extra host or every pill click self-removes.
+const detectPath = path.join(target, 'src', 'content', 'detect.js');
+const detectSource = readFileSync(detectPath, 'utf8');
+const hostCheck = 'if (!LINKEDIN_HOST.test(parsed.hostname)) return null;';
+if (!detectSource.includes(hostCheck)) {
+  throw new Error(`qa build: detect.js host check not found — update the (3c) patch`);
+}
+const stubHost = new URL(pageOrigin).hostname;
+writeFileSync(
+  detectPath,
+  detectSource.replace(
+    hostCheck,
+    `if (!LINKEDIN_HOST.test(parsed.hostname) && parsed.hostname !== '${stubHost}') return null;`,
+  ),
+);
+
+writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+// (1) the endpoint override module + its import at the top of the worker.
+writeFileSync(
+  path.join(target, 'src', 'background', 'qa-endpoints.js'),
+  `// TEST-ONLY (generated by tests/qa/build-qa-copy.js — never shipped): the
+// adapters resolve their endpoints per call via these overrides, so this file
+// retargets every lookup at the local QA stub (tests/qa/qa-stub.js).
+globalThis.__PROSPEO_ENDPOINT__ = '${apiOrigin}/enrich-person';
+globalThis.__HUNTER_ENDPOINT__ = '${apiOrigin}/v2/email-finder';
+`,
+);
+
+const workerPath = path.join(target, 'src', 'background', 'service-worker.js');
+const worker = readFileSync(workerPath, 'utf8');
+writeFileSync(workerPath, `import './qa-endpoints.js';\n\n${worker}`);
+
+const id = keyB64 ? extensionId(keyB64) : '(path-derived — relaunches may change it)';
+console.log(`[qa] extension copy ready: ${target}`);
+console.log(`[qa] extension id: ${id}`);
+console.log(`[qa] popup page: chrome-extension://${keyB64 ? id : '<id>'}/src/popup/popup.html`);
+
+return { extensionId: keyB64 ? id : null };
+}
+
+// --- CLI entry --------------------------------------------------------------
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    buildQaCopy({
+      source: argValue('--source'),
+      target: argValue('--target'),
+      keyFile: argValue('--key-file'),
+      // argValue yields null for omitted flags; null would defeat the
+      // destructuring defaults in buildQaCopy.
+      apiOrigin: argValue('--api-origin') ?? undefined,
+      pageOrigin: argValue('--page-origin') ?? undefined,
+    });
+  } catch (err) {
+    console.error('Usage: node tests/qa/build-qa-copy.js --source <repo-root> --target <dir> [--key-file <pem>]');
+    console.error(String(err.message ?? err));
+    process.exit(1);
+  }
+}

@@ -20,8 +20,9 @@ Five projects share this monorepo:
    `EXPO_PUBLIC_API_BASE_URL` is reachable.
 2. **Chrome MV3 extension ("LinkedIn to Email")** at the repo root: `manifest.json`, the lookup
    flow (service-worker router, popup state machine, options page, on-profile pill), provider
-   adapters, Vitest tooling, a manifest sanity check, and CI. Remaining: visual QA evidence (V6)
-   and the live-provider response fixture (V3). Spec: art_n2m5gMDY.
+   adapters, Vitest tooling, a manifest sanity check, and CI. Visual QA evidence (V6) lives in
+   `docs/qa/` with the capture harness in `tests/qa/` (stub server, disposable QA copy). Remaining:
+   the live-provider response fixture (V3). Spec: art_n2m5gMDY.
 3. **Plant ID web app** in `web/` (Next.js) and `api/` (FastAPI): identify screen with the four
    UI states (upload, identifying, results, low-confidence) + mock-default API client;
    `GET /health`. Ingestion pipeline lives in `pipeline/` (merged, PR #10); the identify API
