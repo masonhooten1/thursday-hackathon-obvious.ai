@@ -1,4 +1,4 @@
-import type { AccountPlan } from "@/lib/contracts";
+import type { AccountPlan, Finding } from "@/lib/contracts";
 import type { RunStatusPayload } from "@/lib/data-source";
 import { scanVintage, type DataProvenance, type EvidenceVintage } from "@/lib/vintage";
 
@@ -12,6 +12,8 @@ import { scanVintage, type DataProvenance, type EvidenceVintage } from "@/lib/vi
 export interface BoardRow {
   company: RunStatusPayload["companies"][number];
   strongestOpportunity: string | null;
+  /** Assessment categories in the plan — the board's "opportunity theme" filter values. */
+  assessmentCategories: Finding["category"][];
   reviewStatus: AccountPlan["status"] | null;
   scanVintage: EvidenceVintage | null;
 }
@@ -45,6 +47,7 @@ export function boardRows(payload: RunStatusPayload, extras: BoardExtras = {}): 
     return {
       company,
       strongestOpportunity: plan?.opportunities[0]?.title ?? null,
+      assessmentCategories: plan ? plan.diagnosis.assessments.map((a) => a.category) : [],
       reviewStatus: plan?.status ?? null,
       // Fixture data is always labeled synthetic by the banner + chips; the
       // vintage columns below describe capture freshness, which applies to

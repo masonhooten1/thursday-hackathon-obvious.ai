@@ -406,7 +406,7 @@ export const fixtureEvidence: Evidence[] = [
 
 export const fixtureSignals: TechnologySignal[] = [
   {
-    id: cid("s1"),
+    id: cid("c1"),
     companyId: FIXTURE_COMPANY_IDS.compa,
     vendor: "HubSpot",
     signature: "js.hs-scripts.com loader script",
@@ -419,7 +419,7 @@ export const fixtureSignals: TechnologySignal[] = [
     conflictingPortalIds: [],
   },
   {
-    id: cid("s2"),
+    id: cid("c2"),
     companyId: FIXTURE_COMPANY_IDS.compa,
     vendor: "HubSpot",
     signature: "hbspt.forms.create embed",
@@ -432,7 +432,7 @@ export const fixtureSignals: TechnologySignal[] = [
     conflictingPortalIds: [],
   },
   {
-    id: cid("s3"),
+    id: cid("c3"),
     companyId: FIXTURE_COMPANY_IDS.compa,
     vendor: "HubSpot",
     signature: "forms.hubspot.com submission POST",
@@ -444,7 +444,7 @@ export const fixtureSignals: TechnologySignal[] = [
     conflictingPortalIds: ["2216543", "2216544"],
   },
   {
-    id: cid("s4"),
+    id: cid("c4"),
     companyId: FIXTURE_COMPANY_IDS.compa,
     vendor: "Webflow",
     signature: "Webflow form data-attributes",
@@ -456,7 +456,7 @@ export const fixtureSignals: TechnologySignal[] = [
     conflictingPortalIds: [],
   },
   {
-    id: cid("s5"),
+    id: cid("c5"),
     companyId: FIXTURE_COMPANY_IDS.crescendo,
     vendor: "HubSpot",
     signature: "First-party subprocessor disclosure",
@@ -468,7 +468,7 @@ export const fixtureSignals: TechnologySignal[] = [
     conflictingPortalIds: [],
   },
   {
-    id: cid("s6"),
+    id: cid("c6"),
     companyId: FIXTURE_COMPANY_IDS.crescendo,
     vendor: "HubSpot",
     signature: "forms.hubspot.com form iframe",
@@ -484,7 +484,7 @@ export const fixtureSignals: TechnologySignal[] = [
 
 export const fixtureCaptures: PageCapture[] = [
   {
-    id: cid("p1"),
+    id: cid("d1"),
     companyId: FIXTURE_COMPANY_IDS.compa,
     url: "https://www.compa.ai/",
     role: "home",
@@ -497,7 +497,7 @@ export const fixtureCaptures: PageCapture[] = [
     limitations: [],
   },
   {
-    id: cid("p2"),
+    id: cid("d2"),
     companyId: FIXTURE_COMPANY_IDS.compa,
     url: "https://www.compa.ai/get-demo",
     role: "demo_contact",
@@ -526,7 +526,7 @@ export const fixtureCaptures: PageCapture[] = [
     limitations: [],
   },
   {
-    id: cid("p3"),
+    id: cid("d3"),
     companyId: FIXTURE_COMPANY_IDS.compa,
     url: "https://www.compa.ai/get-demo",
     role: "demo_contact",
@@ -542,7 +542,7 @@ export const fixtureCaptures: PageCapture[] = [
     limitations: [],
   },
   {
-    id: cid("p4"),
+    id: cid("d4"),
     companyId: FIXTURE_COMPANY_IDS.compa,
     url: "https://www.compa.ai/pricing",
     role: "pricing",
@@ -555,7 +555,7 @@ export const fixtureCaptures: PageCapture[] = [
     limitations: [],
   },
   {
-    id: cid("p5"),
+    id: cid("d5"),
     companyId: FIXTURE_COMPANY_IDS.crescendo,
     url: "https://www.crescendo.ai/subprocessors",
     role: "integration_use_case",
@@ -568,7 +568,7 @@ export const fixtureCaptures: PageCapture[] = [
     limitations: [],
   },
   {
-    id: cid("p6"),
+    id: cid("d6"),
     companyId: FIXTURE_COMPANY_IDS.crescendo,
     url: "https://www.crescendo.ai/contact",
     role: "demo_contact",
@@ -581,7 +581,7 @@ export const fixtureCaptures: PageCapture[] = [
     limitations: [],
   },
   {
-    id: cid("p7"),
+    id: cid("d7"),
     companyId: FIXTURE_COMPANY_IDS.hex,
     url: "https://hex.tech/",
     role: "home",
