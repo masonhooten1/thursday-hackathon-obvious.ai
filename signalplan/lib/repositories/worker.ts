@@ -14,6 +14,7 @@ import type {
   RunFailure,
   RunStatus,
 } from "@/lib/contracts";
+import { campaignLimitsInputSchema, sellerOfferInputSchema } from "@/lib/contracts";
 import type { PoolClient } from "pg";
 import { getPool } from "@/lib/data/db";
 import { mapEvidenceRow } from "./postgres";
@@ -155,9 +156,14 @@ export class PostgresWorkerRepository implements WorkerRepository {
       id: String(r.id),
       workspaceId: String(r.workspace_id),
       name: String(r.name),
-      offer: (r.offer as Campaign["offer"]) ?? { headline: "", idealCustomerProfile: "" },
+      // Re-validate at the boundary: a row written outside the API handler
+      // (seed, migration) must still come back with contract defaults — the
+      // prompt builder reads the optional array fields unconditionally.
+      offer: sellerOfferInputSchema.parse(
+        r.offer ?? { headline: "", idealCustomerProfile: "" },
+      ),
       searchQuery: (r.search_query as string | null) ?? undefined,
-      limits: (r.limits as Campaign["limits"]) ?? undefined,
+      limits: campaignLimitsInputSchema.parse(r.limits ?? {}),
       status: String(r.status) as Campaign["status"],
       createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
       updatedAt: r.updated_at instanceof Date ? r.updated_at.toISOString() : String(r.updated_at),
