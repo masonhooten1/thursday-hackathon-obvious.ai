@@ -2,7 +2,7 @@
 
 ## Repo status
 
-Two scaffolds share this monorepo:
+Three projects share this monorepo:
 
 1. **Chrome MV3 extension ("LinkedIn to Email")** at the repo root: `manifest.json`, placeholder
    source files, Vitest tooling, a manifest sanity check, and CI. Feature code — URL capture,
@@ -11,6 +11,11 @@ Two scaffolds share this monorepo:
 2. **Plant ID web app** in `web/` (Next.js) and `api/` (FastAPI): placeholder identify screen +
    `GET /health`. Ingestion, identify API, real UI states, and the eval harness are follow-up
    PRs (blueprint art_t8aXEd4u).
+3. **SignalPlan** (marketing-audit app) in `signalplan/`: Next.js 15 + TypeScript foundation —
+   frozen Zod contracts (`lib/contracts`), Supabase schema + RLS (`db/schema.sql`), fail-closed
+   auth, the six authenticated API routes, Trigger.dev v4 scaffolding, and a full test suite.
+   Collector, intelligence, and interface modules land in follow-up PRs (spec: Obvious
+   blueprint art_zjmuRNQY, brief art_aQLkJ0vZ).
 
 ## Stack
 
@@ -22,9 +27,11 @@ Two scaffolds share this monorepo:
 - **api/** — FastAPI + uvicorn, Python 3.13 venv at `api/.venv`. Pytest + httpx (TestClient)
   for tests. Ruff (lint + format) configured in the root `pyproject.toml`, pinned in
   `api/requirements-dev.txt` — not yet CI-gated.
-- **CI** — three jobs in `.github/workflows/ci.yml`: extension (`npm ci` → Vitest →
-  check:manifest), web (frozen pnpm install → ESLint → Vitest), api (pip install → pytest).
-  No model or dataset downloads in CI by design.
+- **CI** — `.github/workflows/ci.yml` runs extension (`npm ci` → Vitest → check:manifest),
+  web (frozen pnpm install → ESLint → Vitest), and api (pip install → pytest) jobs; SignalPlan
+  has its own path-scoped workflow (`.github/workflows/signalplan.yml`: npm ci → ESLint →
+  tsc → Vitest with a Postgres service for RLS tests → Next build). No model or dataset
+  downloads in CI by design.
 
 ## Commands
 
@@ -48,6 +55,14 @@ API (from repo root):
   `pytest api/tests/test_health.py` for the health endpoint only
 - `cd api && uvicorn app.main:app --reload` — dev server on :8000
 
+SignalPlan (from repo root):
+
+- `cd signalplan && npm install` — install deps
+- `cd signalplan && npm run lint` / `npx tsc --noEmit` / `npx vitest run` / `npm run build`
+- RLS + worker-repo tests need real Postgres:
+  `TEST_DATABASE_URL="postgresql://user@127.0.0.1:54322/postgres" npx vitest run` from `signalplan/`
+- Vercel Root Directory for this app: `signalplan` (set at deploy time)
+
 Verify before pushing: extension `npm test && npm run check:manifest`; web + api
 `pnpm --dir web lint && pnpm --dir web test && pytest`.
 
@@ -61,6 +76,10 @@ Verify before pushing: extension `npm test && npm run check:manifest`; web + api
   identifying, results, low-confidence) land with the UI PR per the blueprint.
 - `api/app/main.py` only exposes `GET /health`; `/api/identify` arrives with the identify-API
   PR.
+- SignalPlan: contracts in `signalplan/lib/contracts` are frozen — parallel module tasks build
+  against them; not-yet-integrated worker seams (`signalplan/trigger/seams.ts`) mark companies
+  `blocked`, never ready with fabricated evidence. Do not touch root shared files (package.json,
+  ci.yml, vitest.config.ts) for SignalPlan changes — everything lives under `signalplan/`.
 - Accuracy work (embedder, LanceDB index, thresholds) must stay web-independent — see the
   plant-ID blueprint's offline-iPhone design rule. `.gitignore` already excludes model
   weights, `*.lance/`, and `eval.json`.
