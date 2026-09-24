@@ -2,22 +2,26 @@
 
 ## Repo status
 
-This repository is **currently empty** — the only tracked file is `README.md`
-(a title with no content). There are no dependency manifests, no Dockerfile or
-Compose files, no Makefile, and no source files.
-
-No application code exists to run, map, or document yet.
+Chrome MV3 extension ("LinkedIn to Email") scaffolded: `manifest.json`, placeholder
+source files, Vitest tooling, a manifest sanity check, and a GitHub Actions CI
+workflow. Feature code — URL capture, provider adapters, popup/options UI — lands
+in later tasks; placeholders stand in until then.
 
 ## Stack
 
-Unknown — nothing to discover. Do not assume or infer a framework.
+- Chrome Manifest V3 extension: vanilla JavaScript ES modules, no bundler
+- Node 20 for tooling; Vitest for unit tests; no runtime dependencies
 
 ## Commands
 
-None. There is no local dev environment to start and no primary user flow to
-verify.
+- `npm install` — install dev dependencies
+- `npm test` — run the Vitest suite
+- `npm run check:manifest` — validate `manifest.json` (required keys, referenced files)
+
+Local verification: load the repo root unpacked at `chrome://extensions` (see README).
 
 ## Handoff
 
-Stack, commands, codebase map, and local-dev verification guidance will be
-filled in by the next onboarding setup run once application code lands here.
+CI (`.github/workflows/ci.yml`) runs install, Vitest, and the manifest check on
+every push to `main` and every PR. Provider adapters must keep the normalized-result
+contract described in the project spec (Obvious blueprint art_n2m5gMDY).
