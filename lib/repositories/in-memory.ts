@@ -7,7 +7,9 @@ import type {
   WorkspaceSettingsRecord,
 } from "@/lib/contracts";
 import { dedupeDomains } from "@/lib/contracts";
+import type { CompanyStatus, RunFailure, RunStatus } from "@/lib/contracts";
 import type { SignalPlanRepository } from "./types";
+import type { WorkerRepository } from "./worker";
 
 /**
  * In-memory repository used by route tests (and only there). Mirrors the
@@ -28,7 +30,57 @@ function clone<T>(value: T): T {
   return structuredClone(value);
 }
 
-export class InMemoryRepository implements SignalPlanRepository {
+export class InMemoryRepository implements SignalPlanRepository, WorkerRepository {
+  async getRunCompanies(workspaceId: string, runId: string) {
+    return this.tables.companies
+      .filter((c) => c.runId === runId && c.workspaceId === workspaceId)
+      .map((c) => ({ id: c.id, domain: c.domain, name: c.name, status: c.status }));
+  }
+
+  async setCompanyStatus(
+    workspaceId: string,
+    companyId: string,
+    status: CompanyStatus,
+    opts?: { error?: string },
+  ): Promise<void> {
+    const company = this.tables.companies.find(
+      (c) => c.id === companyId && c.workspaceId === workspaceId,
+    );
+    if (!company) return;
+    company.status = status;
+    company.error = opts?.error;
+    company.updatedAt = new Date().toISOString();
+  }
+
+  async setRunStatus(workspaceId: string, runId: string, status: RunStatus): Promise<void> {
+    const run = this.tables.runs.find((r) => r.id === runId && r.workspaceId === workspaceId);
+    if (!run) return;
+    run.status = status;
+    run.updatedAt = new Date().toISOString();
+  }
+
+  async recordRunFailure(
+    workspaceId: string,
+    runId: string,
+    failure: RunFailure,
+  ): Promise<void> {
+    const run = this.tables.runs.find((r) => r.id === runId && r.workspaceId === workspaceId);
+    if (!run) return;
+    run.failures.push(failure);
+  }
+
+  async refreshRunCounters(workspaceId: string, runId: string): Promise<void> {
+    const run = this.tables.runs.find((r) => r.id === runId && r.workspaceId === workspaceId);
+    if (!run) return;
+    const companies = this.tables.companies.filter(
+      (c) => c.runId === runId && c.workspaceId === workspaceId,
+    );
+    run.companiesReady = companies.filter((c) => c.status === "ready").length;
+    run.companiesFailed = companies.filter((c) =>
+      ["failed", "partial", "blocked", "cancelled"].includes(c.status),
+    ).length;
+  }
+
   constructor(public tables: InMemoryTables = {
     workspaces: [],
     campaigns: [],
