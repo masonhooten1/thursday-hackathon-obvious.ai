@@ -55,5 +55,8 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npx tsc --noEmit
+      # The report-template tests print real PDFs with headless chromium
+      # (spec check 6) — install the browser and its OS dependencies first.
+      - run: npx playwright install --with-deps chromium
       - run: npx vitest run
       - run: npm run build
