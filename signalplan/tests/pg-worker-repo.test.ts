@@ -107,6 +107,38 @@ if (!TEST_DATABASE_URL) {
     expect(Number(rows[0].companies_failed)).toBe(1);
   });
 
+  it("defaults an offer row stored without optional arrays (DB-boundary re-validation)", async () => {
+    // Seed a second campaign whose offer JSON omits the optional arrays —
+    // the shape a row gets when written outside the API handler.
+    const bareCampaign = randomUUID();
+    await dbClient.query(
+      "insert into campaigns (id, workspace_id, name, offer, limits) values ($1, $2, 'bare', $3, $4)",
+      [
+        bareCampaign,
+        workspaceId,
+        JSON.stringify({ headline: "h", idealCustomerProfile: "i" }),
+        JSON.stringify({ maxCompanies: 25, maxPagesPerCompany: 6, maxConcurrentJobs: 3, maxModelRequests: 8 }),
+      ],
+    );
+    const bareRun = randomUUID();
+    await dbClient.query(
+      `insert into runs (id, campaign_id, workspace_id, status, idempotency_key,
+         companies_total, companies_ready, companies_failed, model_requests_used, failures)
+       values ($1, $2, $3, 'running', $4, 0, 0, 0, 0, '[]'::jsonb)`,
+      [bareRun, bareCampaign, workspaceId, `bare-${bareRun}`],
+    );
+
+    const repo = repoForScratch();
+    const campaign = await repo.getRunCampaign(workspaceId, bareRun);
+    expect(campaign).not.toBeNull();
+    // Contract defaults applied at the boundary — the prompt builder reads
+    // the optional array fields unconditionally.
+    expect(campaign?.offer.differentiators).toEqual([]);
+    expect(campaign?.offer.proofPoints).toEqual([]);
+    expect(campaign?.offer.exclusions).toEqual([]);
+    expect(campaign?.limits?.maxModelRequests).toBe(8);
+  });
+
   it("records run failures in order", async () => {
     const repo = repoForScratch();
     await repo.recordRunFailure(workspaceId, runId, {
