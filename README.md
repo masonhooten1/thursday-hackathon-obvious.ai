@@ -132,7 +132,10 @@ In scope: single-profile lookup, two providers (Prospeo, Hunter), bring-your-own
 
 A web app that names a plant from an uploaded photo. A frozen BioCLIP 2 embedder plus a reference-image index (LanceDB) does the matching — no model training. The architecture is chosen so the same embedder + index tuple can later run fully offline on iPhone (the project blueprint carries the full spec).
 
-> **Status: scaffold.** The identify screen is a placeholder and the API only exposes `GET /health`. Ingestion, the identify endpoint, real UI states, and the eval harness land in follow-up PRs.
+> **Status: identify flow live end to end.** The four identify-screen states (PR #7), the
+> Pl@ntNet-300K ingestion pipeline + BioCLIP 2/LanceDB reference index (PR #10), and the
+> identify API — `POST /api/identify` with calibrated confidence tiers — are on `main`.
+> Remaining: the eval harness and the hosted demo.
 
 ### Web — Next.js + pnpm (Node 20+, pnpm 10)
 

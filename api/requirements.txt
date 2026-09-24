@@ -3,3 +3,11 @@ fastapi==0.141.1
 httpx==0.28.1
 pytest==9.1.1
 uvicorn==0.53.0
+# Multipart form parsing for the identify upload (required by FastAPI's File()).
+python-multipart==0.0.32
+# Contract-test deps, shared with pipeline/requirements.txt (which leaves them
+# unpinned too): stub vectors, image fixtures, and a real (tiny) LanceDB index.
+numpy
+pillow
+pyarrow
+lancedb
