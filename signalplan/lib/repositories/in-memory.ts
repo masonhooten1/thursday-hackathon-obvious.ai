@@ -1,20 +1,33 @@
 import "server-only";
 import type {
+  AccountPlan,
+  AgentRole,
+  AgentRunStatus,
   Campaign,
   Company,
+  CompanyScore,
+  CompanyStatus,
+  Evidence,
   Export,
+  Finding,
+  HubSpotEvidence,
+  PageCapture,
+  ReviewerVerdict,
   Run,
+  RunFailure,
+  RunStatus,
+  TechnologySignal,
   WorkspaceSettingsRecord,
 } from "@/lib/contracts";
 import { dedupeDomains } from "@/lib/contracts";
-import type { CompanyStatus, RunFailure, RunStatus } from "@/lib/contracts";
 import type { SignalPlanRepository } from "./types";
 import type { WorkerRepository } from "./worker";
 
 /**
- * In-memory repository used by route tests (and only there). Mirrors the
- * Postgres implementation's semantics — idempotency, get-or-create exports,
- * workspace scoping — without a database.
+ * In-memory repository used by route tests and the pipeline integration tests
+ * (and only there). Mirrors the Postgres implementation's semantics —
+ * idempotency, get-or-create exports, replace-on-retry writes, workspace
+ * scoping — without a database.
  */
 
 export interface InMemoryTables {
@@ -22,6 +35,25 @@ export interface InMemoryTables {
   campaigns: Campaign[];
   runs: Run[];
   companies: Company[];
+  evidence: Evidence[];
+  /** Keyed by companyId — the Finding contract carries no workspace/company id. */
+  findings: Record<string, Finding[]>;
+  signals: TechnologySignal[];
+  captures: PageCapture[];
+  accountPlans: AccountPlan[];
+  agentRuns: {
+    id: string;
+    runId: string;
+    companyId: string;
+    workspaceId: string;
+    role: AgentRole;
+    status: AgentRunStatus;
+    attempt: number;
+    verdict?: ReviewerVerdict;
+    error?: string;
+    startedAt?: string;
+    finishedAt?: string;
+  }[];
   exports: Export[];
   settings: WorkspaceSettingsRecord[];
 }
@@ -31,6 +63,13 @@ function clone<T>(value: T): T {
 }
 
 export class InMemoryRepository implements SignalPlanRepository, WorkerRepository {
+  /** True when the company row exists in this workspace (RLS-shaped scoping). */
+  private companyInWorkspace(workspaceId: string, companyId: string): boolean {
+    return this.tables.companies.some(
+      (c) => c.id === companyId && c.workspaceId === workspaceId,
+    );
+  }
+
   async getRunCompanies(workspaceId: string, runId: string) {
     return this.tables.companies
       .filter((c) => c.runId === runId && c.workspaceId === workspaceId)
@@ -59,6 +98,129 @@ export class InMemoryRepository implements SignalPlanRepository, WorkerRepositor
     run.updatedAt = new Date().toISOString();
   }
 
+  async getRunStatus(workspaceId: string, runId: string): Promise<RunStatus | null> {
+    const run = this.tables.runs.find((r) => r.id === runId && r.workspaceId === workspaceId);
+    return run ? run.status : null;
+  }
+
+  async getRunCampaign(workspaceId: string, runId: string): Promise<Campaign | null> {
+    const run = this.tables.runs.find((r) => r.id === runId && r.workspaceId === workspaceId);
+    if (!run) return null;
+    return this.getCampaign(workspaceId, run.campaignId);
+  }
+
+  async getCompanyCore(
+    workspaceId: string,
+    companyId: string,
+  ): Promise<{
+    id: string;
+    name: string;
+    domain: string;
+    status: CompanyStatus;
+    hubspotEvidence: HubSpotEvidence | null;
+  } | null> {
+    const company = this.tables.companies.find(
+      (c) => c.id === companyId && c.workspaceId === workspaceId,
+    );
+    if (!company) return null;
+    return {
+      id: company.id,
+      name: company.name,
+      domain: company.domain,
+      status: company.status,
+      hubspotEvidence: company.hubspotEvidence,
+    };
+  }
+
+  async getCompanyEvidence(workspaceId: string, companyId: string): Promise<Evidence[]> {
+    if (!this.companyInWorkspace(workspaceId, companyId)) return [];
+    return clone(this.tables.evidence.filter((e) => e.companyId === companyId));
+  }
+
+  async reserveModelRequests(
+    workspaceId: string,
+    runId: string,
+    count: number,
+    cap: number,
+  ): Promise<boolean> {
+    const run = this.tables.runs.find((r) => r.id === runId && r.workspaceId === workspaceId);
+    if (!run || run.status === "cancelled") return false;
+    if (run.modelRequestsUsed + count > cap) return false;
+    run.modelRequestsUsed += count;
+    run.updatedAt = new Date().toISOString();
+    return true;
+  }
+
+  async saveFindings(workspaceId: string, companyId: string, findings: Finding[]): Promise<void> {
+    if (!this.companyInWorkspace(workspaceId, companyId)) return;
+    // Replace semantics: a retried analysis never duplicates findings (check 5).
+    this.tables.findings[companyId] = findings.map(clone);
+  }
+
+  async saveAccountPlan(workspaceId: string, companyId: string, plan: AccountPlan): Promise<void> {
+    if (!this.companyInWorkspace(workspaceId, companyId)) return;
+    this.tables.accountPlans = this.tables.accountPlans.filter((p) => p.companyId !== companyId);
+    this.tables.accountPlans.push(clone(plan));
+  }
+
+  async saveCompanyScore(
+    workspaceId: string,
+    companyId: string,
+    score: CompanyScore,
+  ): Promise<void> {
+    const company = this.tables.companies.find(
+      (c) => c.id === companyId && c.workspaceId === workspaceId,
+    );
+    if (!company) return;
+    company.score = clone(score);
+    company.updatedAt = new Date().toISOString();
+  }
+
+  async recordAgentRun(
+    workspaceId: string,
+    runId: string,
+    companyId: string,
+    record: {
+      role: AgentRole;
+      status: AgentRunStatus;
+      attempt: number;
+      verdict?: ReviewerVerdict;
+      error?: string;
+      startedAt?: string;
+      finishedAt?: string;
+    },
+  ): Promise<void> {
+    // One durable row per (company, role): a retried specialist replaces its
+    // previous record instead of duplicating it (check 5).
+    this.tables.agentRuns = this.tables.agentRuns.filter(
+      (a) => !(a.companyId === companyId && a.workspaceId === workspaceId && a.role === record.role),
+    );
+    this.tables.agentRuns.push({
+      id: crypto.randomUUID(),
+      runId,
+      companyId,
+      workspaceId,
+      ...clone(record),
+    });
+  }
+
+  async setExportStatus(
+    workspaceId: string,
+    exportId: string,
+    update: { status: "ready" | "failed"; storageKey?: string; error?: string },
+  ): Promise<void> {
+    const record = this.tables.exports.find(
+      (e) => e.id === exportId && e.workspaceId === workspaceId,
+    );
+    if (!record) return;
+    record.status = update.status;
+    record.storageKey = update.storageKey;
+    record.error = update.error;
+    if (update.status === "ready" || update.status === "failed") {
+      record.completedAt = new Date().toISOString();
+    }
+  }
+
   async recordRunFailure(
     workspaceId: string,
     runId: string,
@@ -66,7 +228,7 @@ export class InMemoryRepository implements SignalPlanRepository, WorkerRepositor
   ): Promise<void> {
     const run = this.tables.runs.find((r) => r.id === runId && r.workspaceId === workspaceId);
     if (!run) return;
-    run.failures.push(failure);
+    run.failures.push(clone(failure));
   }
 
   async refreshRunCounters(workspaceId: string, runId: string): Promise<void> {
@@ -81,14 +243,25 @@ export class InMemoryRepository implements SignalPlanRepository, WorkerRepositor
     ).length;
   }
 
-  constructor(public tables: InMemoryTables = {
-    workspaces: [],
-    campaigns: [],
-    runs: [],
-    companies: [],
-    exports: [],
-    settings: [],
-  }) {}
+  tables: InMemoryTables;
+
+  constructor(tables: Partial<InMemoryTables> = {}) {
+    this.tables = {
+      workspaces: [],
+      campaigns: [],
+      runs: [],
+      companies: [],
+      evidence: [],
+      findings: {},
+      signals: [],
+      captures: [],
+      accountPlans: [],
+      agentRuns: [],
+      exports: [],
+      settings: [],
+      ...tables,
+    };
+  }
 
   async listWorkspaceIdsForUser(userId: string): Promise<string[]> {
     return this.tables.workspaces
@@ -203,10 +376,28 @@ export class InMemoryRepository implements SignalPlanRepository, WorkerRepositor
     return found ? clone(found) : null;
   }
 
-  async getCompanyAudit(): Promise<null> {
-    // Audit bundles are produced by the intelligence module; the skeleton has
-    // no captures or findings yet.
-    return null;
+  async getCompanyAudit(
+    workspaceId: string,
+    companyId: string,
+  ): Promise<{
+    company: Company;
+    evidence: Evidence[];
+    findings: Finding[];
+    signals: TechnologySignal[];
+    captures: PageCapture[];
+    accountPlan: AccountPlan | null;
+  } | null> {
+    const company = await this.getCompany(workspaceId, companyId);
+    if (!company) return null;
+    return {
+      company,
+      evidence: clone(this.tables.evidence.filter((e) => e.companyId === companyId)),
+      findings: clone(this.tables.findings[companyId] ?? []),
+      signals: clone(this.tables.signals.filter((s) => s.companyId === companyId)),
+      captures: clone(this.tables.captures.filter((c) => c.companyId === companyId)),
+      accountPlan:
+        clone(this.tables.accountPlans.find((p) => p.companyId === companyId)) ?? null,
+    };
   }
 
   async getOrCreateExport(
