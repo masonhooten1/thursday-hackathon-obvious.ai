@@ -14,7 +14,7 @@ Hackathon monorepo with five projects sharing the repo:
 
 What is bookable tonight in the parks? A terrain map of national-park campgrounds with availability refreshed every 15 minutes by a polite poller and a booking deep link on every result. Spec: Obvious blueprint art_VwFCEgL3.
 
-> **Status: scaffold (milestone D1).** Monorepo structure, the shared wire contract, API seams, and CI are in place. The campground catalog (D2), Recreation.gov adapters (D3), poller (D4), and map UI (D5) land in follow-up PRs.
+> **Status: catalog (milestone D2).** Scaffold, shared wire contract, Recreation.gov/RIDB adapters, CI, and the campground catalog are in place. The poller (D4) and map UI (D5) land in follow-up PRs.
 
 ### Structure
 
@@ -42,6 +42,17 @@ Run locally:
 npm run dev --workspace=@campground/api      # API on http://localhost:8787
 npm start --workspace=@campground/mobile     # Expo dev server (Expo Go / web)
 ```
+
+Load the campground catalog (services/api/data/ is gitignored):
+
+```bash
+npm run seed --workspace=@campground/api     # validates seed files, replaces SQLite catalog, health-checks all 60 facility ids
+```
+
+The catalog lives in `services/api/seed/` (six parks, 60 campgrounds pulled live
+from Recreation.gov) — see `services/api/seed/README.md` for provenance and
+curation rules. The seeder flags dead facility ids in its output instead of
+failing; re-running retries anything unverified.
 
 API surface while the poller is pending: `GET /health` and `GET /api/availability?date=YYYY-MM-DD` (empty but contract-valid until D4 wires snapshots in).
 
