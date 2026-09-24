@@ -12,9 +12,12 @@ Five projects share this monorepo:
    client), the campground catalog (D2 — versioned seed in `services/api/seed/`, seeder with
    live facility-id health checks, reproducible generator; provenance in
    `services/api/seed/README.md`), and the map app (D5 — fixture data layer, map-first screen,
-   filters, detail sheet, booking links, Google Maps JS/react-native-maps integration) are done;
-   RIDB live verification is pending a valid API key (see the doc). Poller (D4) lands next; the
-   app switches from fixtures to the API when `EXPO_PUBLIC_API_BASE_URL` is reachable.
+   filters, detail sheet, booking links, Google Maps JS/react-native-maps integration), and
+   the poller + API (D4 — snapshot store, staggered single-flight poll cycle, GET
+   parks/campgrounds/availability, bearer-guarded admin trigger; see `services/api/README.md`)
+   are done; RIDB live verification is pending a valid API key (see the doc). Live integration
+   demo (D6) lands next; the app switches from fixtures to the API when
+   `EXPO_PUBLIC_API_BASE_URL` is reachable.
 2. **Chrome MV3 extension ("LinkedIn to Email")** at the repo root: `manifest.json`, the lookup
    flow (service-worker router, popup state machine, options page, on-profile pill), provider
    adapters, Vitest tooling, a manifest sanity check, and CI. Remaining: visual QA evidence (V6)
@@ -60,10 +63,14 @@ Campground Tonight (from repo root; one `npm install` covers root + all three wo
 - `npm run export:web --workspace=@campground/mobile` — Expo web export to `apps/mobile/dist`
 - `GOOGLE_MAPS_API_KEY` (native config) and `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (web bundle) supply
   the terrain map key — see `docs/google-maps.md`; builds work without it (labeled web fallback)
-- `npm run dev --workspace=@campground/api` — API on :8787
+- `npm run dev --workspace=@campground/api` — API on :8787 (scheduler armed, poll cadence 15 min)
+- `npm start --workspace=@campground/api` — one-shot run without the watch loop
 - `npm run seed --workspace=@campground/api` — load `services/api/seed/*.json` into SQLite
   (catalog tables replaced atomically), health-checking every facility id against the live
   booking page (spaced GETs); dead ids are flagged in output, never a failure
+- Manual poll trigger (requires ADMIN_POLL_SECRET at server start):
+  `curl -X POST -H "Authorization: Bearer $ADMIN_POLL_SECRET" http://localhost:8787/api/admin/poll`
+  — runs one full cycle and returns its report (polled/succeeded/failed/pruned)
 - `npm start --workspace=@campground/mobile` — Expo dev server
 
 Extension (repo root):
@@ -104,12 +111,16 @@ StayRadar (from repo root):
 - **Contract discipline:** wire-format changes go through `packages/shared/src/contract.ts`
   (zod schemas are the source of truth; types are inferred from them). The API and the app must
   not hand-roll their own shapes.
-- **Politeness:** only `services/api` touches Recreation.gov/RIDB. When the availability adapter
-  lands (D3), it keeps one request in flight per host, spaces requests, sends an identifying
-  User-Agent, backs off exponentially on 429/5xx, and never retries a 403 (a block is a signal,
-  not an error to hammer).
+- **Politeness:** only `services/api` touches Recreation.gov/RIDB. The availability adapter
+  (D3) keeps one request in flight per host, spaces requests, sends an identifying User-Agent,
+  backs off exponentially on 429/5xx, and never retries a 403 (a block is a signal, not an
+  error to hammer). The poller (D4) polls the catalog sequentially with a 250 ms stagger — one
+  cycle is a stroll across campgrounds, never a burst.
 - **Degradation:** metadata-only mode is a designed state — if the availability endpoint proves
-  unusable, ship map, filters, booking links, and an honest "availability unknown" state.
+  unusable, ship map, filters, booking links, and an honest "availability unknown" state. In
+  the API the same rule shows up as last-known data: a failing facility keeps its previous
+  snapshot and is logged degraded, and the response-level `stale` flag flips only when every
+  served snapshot is past twice the poll interval.
 - **Vitest boundaries:** every workspace has its own `vitest.config.ts` so nothing inherits the
   root (extension) config by directory-walk; the root config stays scoped to `src/` and `tests/`
   so root `npm test` never scans `web/` or the workspaces. Root `npm test` chains extension
