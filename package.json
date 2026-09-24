@@ -2,13 +2,20 @@
   "name": "linkedin-to-email",
   "version": "0.1.0",
   "private": true,
-  "description": "Chrome MV3 extension: LinkedIn profile URL in, company email out via your own enrichment API key.",
+  "description": "Hackathon monorepo: Chrome MV3 extension (root), Plant ID web app (web/ + api/), SignalPlan (signalplan/), and Campground Tonight (apps/ + services/ + packages/).",
   "type": "module",
   "engines": {
     "node": ">=20"
   },
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
   "scripts": {
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run --passWithNoTests && npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
     "check:manifest": "node scripts/check-manifest.js"
   },
   "devDependencies": {

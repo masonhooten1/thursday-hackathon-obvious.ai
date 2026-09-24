@@ -32,3 +32,11 @@ eval.json
 !.env.example
 .DS_Store
 coverage/
+
+# --- Campground Tonight (npm workspaces) ---
+.expo/
+expo-env.d.ts
+dist/
+*.db
+*.db-shm
+*.db-wal
