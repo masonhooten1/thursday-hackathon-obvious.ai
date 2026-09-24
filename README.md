@@ -1,9 +1,56 @@
 # thursday-hackathon-obvious.ai
 
-Hackathon monorepo with two projects sharing the repo:
+Hackathon monorepo with five projects sharing the repo:
 
+- **Campground Tonight** — last-minute campsite availability; Expo app, availability API, and shared contract in `apps/`, `services/`, and `packages/` (npm workspaces).
 - **LinkedIn to Email** — Chrome (Manifest V3) extension at the repo root.
 - **Plant ID from photos** — Next.js + FastAPI web app in `web/` and `api/`.
+- **SignalPlan** — marketing-audit app in `signalplan/` (see `signalplan/README.md`).
+- **StayRadar** — accommodation-market research shell in `stayradar/`.
+
+---
+
+## Campground Tonight (apps/ · services/ · packages/)
+
+What is bookable tonight in the parks? A terrain map of national-park campgrounds with availability refreshed every 15 minutes by a polite poller and a booking deep link on every result. Spec: Obvious blueprint art_VwFCEgL3.
+
+> **Status: scaffold (milestone D1).** Monorepo structure, the shared wire contract, API seams, and CI are in place. The campground catalog (D2), Recreation.gov adapters (D3), poller (D4), and map UI (D5) land in follow-up PRs.
+
+### Structure
+
+| Workspace | Path | What it is |
+| --- | --- | --- |
+| `@campground/shared` | `packages/shared` | Zod schemas + TypeScript types for the wire contract (`SiteType`, `Park`, `Campground`, `AvailabilitySnapshot`, `AvailabilityResponse`). Single source of truth — API and app both import it. |
+| `@campground/api` | `services/api` | Hono on Node 20, better-sqlite3 in WAL mode, in-process node-cron scheduler. Owns all external requests. |
+| `@campground/mobile` | `apps/mobile` | Expo + expo-router + TypeScript — iPhone, Android, and web from one codebase. |
+
+### Commands (from the repo root)
+
+One install, one lockfile — the three workspaces are npm workspaces:
+
+```bash
+npm install
+npm test           # extension Vitest + per-workspace smoke tests
+npm run lint       # per-workspace ESLint
+npm run typecheck  # per-workspace tsc --noEmit
+npm run export:web --workspace=@campground/mobile   # Expo web export -> apps/mobile/dist
+```
+
+Run locally:
+
+```bash
+npm run dev --workspace=@campground/api      # API on http://localhost:8787
+npm start --workspace=@campground/mobile     # Expo dev server (Expo Go / web)
+```
+
+API surface while the poller is pending: `GET /health` and `GET /api/availability?date=YYYY-MM-DD` (empty but contract-valid until D4 wires snapshots in).
+
+### Conventions
+
+- Wire-format changes go through `packages/shared/src/contract.ts` — zod schemas are the source of truth; types are inferred from them.
+- Only `services/api` talks to Recreation.gov/RIDB. The future adapter keeps one request in flight per host, request spacing, an identifying User-Agent, exponential backoff on 429/5xx, and never retries a 403.
+- Metadata-only mode is a designed state: if the availability endpoint proves unusable, map, filters, booking links, and an honest "availability unknown" state still ship.
+- CI (`.github/workflows/campground.yml`) runs lint, typecheck, tests, and the Expo web export on every PR and push to `main`.
 
 ---
 
@@ -98,10 +145,40 @@ ruff format --check api
 
 ---
 
+## SignalPlan (signalplan/)
+
+Marketing-audit app — Next.js 15 + TypeScript foundation with frozen Zod contracts (`signalplan/lib/contracts`), Supabase schema + RLS, fail-closed auth, and Trigger.dev v4 scaffolding. Details in `signalplan/README.md`.
+
+```bash
+cd signalplan && npm install
+cd signalplan && npm run lint && npx tsc --noEmit && npx vitest run && npm run build
+```
+
+RLS + worker-repo tests need real Postgres:
+
+```bash
+TEST_DATABASE_URL="postgresql://user@127.0.0.1:54322/postgres" npx vitest run   # from signalplan/
+```
+
+---
+
+## StayRadar (stayradar/)
+
+Accommodation-market research shell — Next.js (pnpm) with a fixture-backed search UI. Details in `stayradar/README.md`.
+
+```bash
+pnpm --dir stayradar install
+pnpm --dir stayradar lint
+pnpm --dir stayradar test
+pnpm --dir stayradar build
+```
+
+---
+
 ## CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs three jobs on every push to `main` and every PR:
+GitHub Actions runs on every push to `main` and every PR:
 
-- **Extension Vitest + manifest** — `npm ci`, Vitest, manifest sanity check (repo root)
-- **Web lint + Vitest** — frozen pnpm install, ESLint, Vitest (`web/`)
-- **API pytest** — pip install, pytest (`api/`)
+- `.github/workflows/ci.yml` — extension (npm ci → Vitest → manifest check), plant-ID web (pnpm → ESLint → Vitest), plant-ID api (pip → pytest), StayRadar (pnpm → lint → Vitest → build)
+- `.github/workflows/signalplan.yml` — SignalPlan (lint → tsc → Vitest with a Postgres service → Next build)
+- `.github/workflows/campground.yml` — Campground Tonight (lint + typecheck + tests, plus the Expo web export with artifact upload)
