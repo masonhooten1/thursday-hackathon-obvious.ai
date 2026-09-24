@@ -77,7 +77,7 @@ export function createCampaignRunsRoutes(deps: RouteDeps) {
 
     if (deps.enqueueRun) {
       try {
-        await deps.enqueueRun(run.id);
+        await deps.enqueueRun(guard.workspaceId, run.id);
       } catch (err) {
         // The run is durably queued in the database; enqueue failure is
         // surfaced so the operator can re-trigger without recreating work.

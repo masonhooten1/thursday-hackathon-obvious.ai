@@ -6,9 +6,14 @@ import { runStatusFromCompanies } from "@/lib/workers/orchestration";
 
 /**
  * run-batch (spec §System shape): validates the run, flips it to running,
- * fans out one run-company task per queued company, then rolls the terminal
- * states back into the run. Company-level failures never fail the batch —
- * they surface as run failures and a partial/failed run status.
+ * fans out one run-company task per queued company, then leaves the terminal
+ * rollup to the company jobs themselves — with three jobs in flight, the
+ * batch task finishes long before the companies do, so any status it set
+ * here would be a lie. Company-level failures never fail the batch — they
+ * surface as run failures and a partial/failed run status (check 3).
+ *
+ * Resume-safe (check 5): only `queued` companies are enqueued, so a retried
+ * batch task or a re-triggered run never duplicates work.
  */
 export const runBatchTask = task({
   id: "run-batch",
@@ -34,22 +39,35 @@ export async function runBatch(
   payload: { runId: string; workspaceId: string },
   repo: WorkerRepository,
   enqueueCompany: (company: { id: string; domain: string }) => Promise<unknown>,
-): Promise<{ runId: string; status: string }> {
+): Promise<{ runId: string; status: string; dispatched: number }> {
+  const current = await repo.getRunStatus(payload.workspaceId, payload.runId);
+  // A cancelled run is terminal: no re-dispatch from a stale callback.
+  if (current === "cancelled") {
+    return { runId: payload.runId, status: "cancelled", dispatched: 0 };
+  }
+
   await repo.setRunStatus(payload.workspaceId, payload.runId, "running");
   const companies = await repo.getRunCompanies(payload.workspaceId, payload.runId);
+
+  let dispatched = 0;
   for (const company of companies) {
+    // Cancel guard while dispatching: an operator cancel mid-fan-out stops
+    // further companies promptly.
+    const status = await repo.getRunStatus(payload.workspaceId, payload.runId);
+    if (status === "cancelled") break;
     if (company.status === "queued") {
       await enqueueCompany(company);
+      dispatched += 1;
     }
   }
-  // Terminal states arrive as companies finish; the run row is reaped here
-  // for the simple synchronous case and by run-company on every transition.
+
   await repo.refreshRunCounters(payload.workspaceId, payload.runId);
   const refreshed = await repo.getRunCompanies(payload.workspaceId, payload.runId);
-  await repo.setRunStatus(
-    payload.workspaceId,
-    payload.runId,
-    runStatusFromCompanies(refreshed.map((c) => c.status)),
-  );
-  return { runId: payload.runId, status: "dispatched" };
+  const rolled = runStatusFromCompanies(refreshed.map((c) => c.status));
+  if (rolled !== "running") {
+    // Everything already terminal (e.g. resume of a finished run): publish
+    // the honest rollup. Otherwise the company jobs reap the run as they go.
+    await repo.setRunStatus(payload.workspaceId, payload.runId, rolled);
+  }
+  return { runId: payload.runId, status: rolled, dispatched };
 }
