@@ -1,0 +1,114 @@
+{
+  "_provenance": "Reconstructed from the documented RIDB schema and community client models (camply, node-ridb) — NOT a live capture. The stored RIDB_API_KEY was rejected as a placeholder (401 Unauthorized Access, 2026-09-24); rebuild from a live response once a real key is stored. Mather Campground values match public data.",
+  "facility": {
+    "FacilityID": 232490,
+    "FacilityName": "Mather Campground",
+    "FacilityTypeDescription": "CAMPING",
+    "FacilityUseFeeDescription": "",
+    "FacilityLatitude": 36.0616,
+    "FacilityLongitude": -112.1082,
+    "FacilityReservationURL": "",
+    "FacilityMapURL": "",
+    "Enabled": true,
+    "Reservable": true,
+    "ParentRecAreaID": 2996,
+    "LegacyFacilityID": 732260,
+    "FACILITYADDRESS": [],
+    "GEOJSON": { "type": "Point", "coordinates": [-112.1082, 36.0616] }
+  },
+  "campsitesPage1": {
+    "METADATA": { "RESULTS": { "CURRENT_COUNT": 3, "TOTAL_COUNT": 8 } },
+    "RECDATA": [
+      {
+        "CampsiteID": 4085,
+        "FacilityID": 232490,
+        "CampsiteName": "037",
+        "CampsiteType": "RV NONELECTRIC",
+        "TypeOfUse": "Overnight",
+        "Loop": "Aspen Loop (Sites 1-59)",
+        "CampsiteReservable": true,
+        "ATTRIBUTES": []
+      },
+      {
+        "CampsiteID": 4122,
+        "FacilityID": 232490,
+        "CampsiteName": "112",
+        "CampsiteType": "TENT ONLY NONELECTRIC",
+        "TypeOfUse": "Overnight",
+        "Loop": "Aspen Loop (Sites 1-59)",
+        "CampsiteReservable": true,
+        "ATTRIBUTES": []
+      },
+      {
+        "CampsiteID": 4312,
+        "FacilityID": 232490,
+        "CampsiteName": "203",
+        "CampsiteType": "STANDARD NONELECTRIC",
+        "TypeOfUse": "Overnight",
+        "Loop": "Aspen Loop (Sites 1-59)",
+        "CampsiteReservable": true,
+        "ATTRIBUTES": []
+      }
+    ]
+  },
+  "campsitesPage2": {
+    "METADATA": { "RESULTS": { "CURRENT_COUNT": 3, "TOTAL_COUNT": 8 } },
+    "RECDATA": [
+      {
+        "CampsiteID": 4203,
+        "FacilityID": 232490,
+        "CampsiteName": "GROUP 01",
+        "CampsiteType": "GROUP TENT ONLY AREA NONELECTRIC",
+        "TypeOfUse": "Overnight",
+        "Loop": "Group Sites",
+        "CampsiteReservable": true,
+        "ATTRIBUTES": []
+      },
+      {
+        "CampsiteID": 4450,
+        "FacilityID": 232490,
+        "CampsiteName": "CABIN 01",
+        "CampsiteType": "CABIN NONELECTRIC",
+        "TypeOfUse": "Overnight",
+        "Loop": "Cabins",
+        "CampsiteReservable": true,
+        "ATTRIBUTES": []
+      },
+      {
+        "CampsiteID": 4501,
+        "FacilityID": 232490,
+        "CampsiteName": "YURT 01",
+        "CampsiteType": "YURT",
+        "TypeOfUse": "Overnight",
+        "Loop": "Yurts",
+        "CampsiteReservable": true,
+        "ATTRIBUTES": []
+      }
+    ]
+  },
+  "campsitesPage3": {
+    "METADATA": { "RESULTS": { "CURRENT_COUNT": 2, "TOTAL_COUNT": 8 } },
+    "RECDATA": [
+      {
+        "CampsiteID": 4214,
+        "FacilityID": 232490,
+        "CampsiteName": "EQ 01",
+        "CampsiteType": "EQUESTRIAN NONELECTRIC",
+        "TypeOfUse": "Overnight",
+        "Loop": "Corral",
+        "CampsiteReservable": true,
+        "ATTRIBUTES": []
+      },
+      {
+        "CampsiteID": 4555,
+        "FacilityID": 232490,
+        "CampsiteName": "??",
+        "CampsiteType": null,
+        "TypeOfUse": "Overnight",
+        "Loop": "Unknown",
+        "CampsiteReservable": true,
+        "ATTRIBUTES": []
+      }
+    ]
+  }
+}
