@@ -85,7 +85,7 @@ manifest.content_scripts = manifest.content_scripts.map((cs) => ({
 if (manifest.web_accessible_resources) {
   manifest.web_accessible_resources = manifest.web_accessible_resources.map((war) => ({
     ...war,
-    matches: [...new Set([...war.matches, `${pageOrigin}/in/*`])],
+    matches: [...new Set([...war.matches, `${pageOrigin}/*`])],
   }));
 }
 
