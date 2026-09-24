@@ -49,7 +49,7 @@ Database (requires a PostGIS-enabled Postgres; see below):
   ```sh
   docker run -d --name stayradar-postgis -p 5432:5432 \
     -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=stayradar_test \
-    postgis/postgis:16
+    postgis/postgis:16-3.5
   export TEST_DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:5432/stayradar_test"
   ```
 
