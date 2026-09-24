@@ -179,14 +179,18 @@ describe("upload state", () => {
     expect(screen.getByLabelText("Choose a plant photo")).toHaveAttribute("accept", "image/*");
   });
 
-  it("starts identifying when a photo is dropped on the affordance", async () => {
-    render(<IdentifyScreen client={new MockIdentifyClient(0)} />);
+  it("starts identifying when a photo is dropped on the affordance", () => {
+    // Scripted client keeps the identifying state open — a latency-0 mock can
+    // reach results before the assertion runs, so this must not be transient.
+    const client = new ScriptedClient();
+    client.enqueue();
+    render(<IdentifyScreen client={client} />);
 
     fireEvent.drop(screen.getByTestId("upload-affordance"), {
       dataTransfer: { files: [photo("dropped.jpg")] },
     });
 
-    expect(await screen.findByAltText("The plant photo being identified")).toBeInTheDocument();
+    expect(screen.getByAltText("The plant photo being identified")).toBeInTheDocument();
   });
 
   it("rejects non-image files before any request", () => {
