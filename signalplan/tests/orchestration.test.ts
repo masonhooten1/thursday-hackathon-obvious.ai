@@ -78,7 +78,7 @@ describe("runCompany", () => {
   it("marks the company blocked and records the failure when the collector seam is not integrated", async () => {
     const { users, runId, companyIds } = setup();
     const status = await runCompany(
-      { runId, workspaceId: users.workspaceA, companyId: companyIds[0] },
+      { runId, workspaceId: users.workspaceA, companyId: companyIds[0], domain: "example.com" },
       users.repo,
       async () => {
         throw new SeamNotIntegratedError("collector");
@@ -96,7 +96,7 @@ describe("runCompany", () => {
     const { users, runId, companyIds } = setup();
     await expect(
       runCompany(
-        { runId, workspaceId: users.workspaceA, companyId: companyIds[0] },
+        { runId, workspaceId: users.workspaceA, companyId: companyIds[0], domain: "example.com" },
         users.repo,
         async () => {
           throw new Error("DNS resolution failed");
@@ -114,7 +114,11 @@ describe("runCompany", () => {
     };
     const outcomes = await Promise.all(
       companyIds.map((companyId) =>
-        runCompany({ runId, workspaceId: users.workspaceA, companyId }, users.repo, failing),
+        runCompany(
+          { runId, workspaceId: users.workspaceA, companyId, domain: "example.com" },
+          users.repo,
+          failing,
+        ),
       ),
     );
     expect(outcomes.every((o) => o.status === "blocked")).toBe(true);
@@ -168,8 +172,8 @@ describe("runBatch", () => {
     await runBatch(
       { runId, workspaceId: users.workspaceA },
       users.repo,
-      async (companyId) => {
-        enqueued.push(companyId);
+      async (company) => {
+        enqueued.push(company.id);
       },
     );
     expect(enqueued).toEqual(ids);

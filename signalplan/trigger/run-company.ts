@@ -23,24 +23,25 @@ export const runCompanyTask = task({
   run: async ({
     payload,
   }: {
-    payload: { runId: string; workspaceId: string; companyId: string };
+    payload: { runId: string; workspaceId: string; companyId: string; domain: string };
   }) =>
     runCompany(payload, new PostgresWorkerRepository(), realCollectorSeam()),
 });
 
 /** Testable core: repository and collector are injected. */
 export async function runCompany(
-  payload: { runId: string; workspaceId: string; companyId: string },
+  payload: { runId: string; workspaceId: string; companyId: string; domain: string },
   repo: WorkerRepository,
   collector: CollectorSeam,
 ): Promise<{ companyId: string; status: CompanyStatus }> {
-  const { workspaceId, companyId, runId } = payload;
+  const { workspaceId, companyId, runId, domain } = payload;
   await repo.setCompanyStatus(workspaceId, companyId, "collecting");
 
   try {
-    // Seam: the collector module task fills this in — bounded page selection,
-    // HTML fetch, selective render, network capture, signature detection.
-    await collector({ companyId, domain: "" });
+    // The collector: bounded page selection, guarded HTML fetch, selective
+    // render, network capture, and signature detection, persisted
+    // workspace-scoped (workers/collector).
+    await collector({ companyId, domain, workspaceId });
   } catch (err) {
     const { status, retryable } = companyStatusAfterError(err);
     await repo.setCompanyStatus(workspaceId, companyId, status, {
