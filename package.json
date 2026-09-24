@@ -1,17 +1,41 @@
 {
-  "name": "linkedin-to-email",
+  "name": "signalplan",
   "version": "0.1.0",
   "private": true,
-  "description": "Chrome MV3 extension: LinkedIn profile URL in, company email out via your own enrichment API key.",
-  "type": "module",
-  "engines": {
-    "node": ">=20"
-  },
+  "description": "Evidence-backed startup marketing audits — protected Next.js app with Supabase persistence and Trigger.dev workers",
   "scripts": {
-    "test": "vitest run --passWithNoTests",
-    "check:manifest": "node scripts/check-manifest.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "@trigger.dev/sdk": "^4.6.4",
+    "jose": "^5.9.0",
+    "next": "^15.0.0",
+    "pg": "^8.13.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "server-only": "^0.0.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "vitest": "^4.1.11"
+    "@eslint/eslintrc": "^3.1.0",
+    "@types/node": "^20.16.0",
+    "@types/pg": "^8.11.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.15.0",
+    "eslint-config-next": "^15.0.0",
+    "trigger.dev": "^4.6.4",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

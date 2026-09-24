@@ -1,34 +1,27 @@
-# --- Node / Next.js (web/) ---
+# dependencies
 node_modules/
+
+# next.js
 .next/
 out/
-*.tsbuildinfo
 next-env.d.ts
 
-# --- Python ---
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.pytest_cache/
-.ruff_cache/
-*.egg-info/
+# production
+build/
+dist/
 
-# --- Models, datasets, and generated artifacts (ingestion/eval land later) ---
-models/
-data/
-*.lance/
-*.pt
-*.onnx
-*.gguf
-*.safetensors
-*.ckpt
-*.mlpackage
-*.mlmodel
-eval.json
-
-# --- Environment & misc ---
-.env*
+# env — never commit real values (.env.example is the template)
+.env
+.env.*
 !.env.example
-.DS_Store
+
+# testing
 coverage/
+
+# trigger.dev dev server state
+.trigger/
+
+# misc
+*.tsbuildinfo
+.DS_Store
+npm-debug.log*
