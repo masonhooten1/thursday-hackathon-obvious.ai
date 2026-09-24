@@ -12,8 +12,14 @@
   "content_scripts": [
     {
       "matches": ["https://www.linkedin.com/in/*"],
-      "js": ["src/content/detect.js", "src/content/pill.js"],
+      "js": ["src/content/inject.js"],
       "css": ["src/content/pill.css"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/content/pill.js", "src/content/detect.js"],
+      "matches": ["https://www.linkedin.com/in/*"]
     }
   ],
   "action": {

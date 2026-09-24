@@ -80,6 +80,15 @@ manifest.content_scripts = manifest.content_scripts.map((cs) => ({
   matches: [...new Set([...cs.matches, `${pageOrigin}/in/*`])],
 }));
 
+// (3b) the web-accessible pill modules must also load from the stub page, or
+// the bootstrap's dynamic import is blocked on the local stand-in.
+if (manifest.web_accessible_resources) {
+  manifest.web_accessible_resources = manifest.web_accessible_resources.map((war) => ({
+    ...war,
+    matches: [...new Set([...war.matches, `${pageOrigin}/in/*`])],
+  }));
+}
+
 writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
 // (1) the endpoint override module + its import at the top of the worker.
