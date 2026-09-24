@@ -17,21 +17,24 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 function argValue(flag) {
   const index = process.argv.indexOf(flag);
   return index !== -1 && process.argv[index + 1] ? process.argv[index + 1] : null;
 }
 
-const source = argValue('--source');
-const target = argValue('--target');
-const keyFile = argValue('--key-file');
-const apiOrigin = argValue('--api-origin') ?? 'http://127.0.0.1:8899';
-const pageOrigin = argValue('--page-origin') ?? 'http://127.0.0.1:8898';
-
+/**
+ * Build a test-only copy of the extension with the QA hooks. Pure over its
+ * inputs (writes only under `target`) so tests can assert on the output.
+ *
+ * @param {{ source: string, target: string, keyFile?: string|null,
+ *           apiOrigin?: string, pageOrigin?: string }} options
+ * @returns {{ extensionId: string | null }}
+ */
+export function buildQaCopy({ source, target, keyFile = null, apiOrigin = 'http://127.0.0.1:8899', pageOrigin = 'http://127.0.0.1:8898' }) {
 if (!source || !target || !existsSync(path.join(source, 'manifest.json'))) {
-  console.error('Usage: node tests/qa/build-qa-copy.js --source <repo-root> --target <dir> [--key-file <pem>]');
-  process.exit(1);
+  throw new Error('buildQaCopy: --source (repo root) and --target are required');
 }
 
 // --- pinned extension ID ----------------------------------------------------
@@ -129,3 +132,25 @@ const id = keyB64 ? extensionId(keyB64) : '(path-derived — relaunches may chan
 console.log(`[qa] extension copy ready: ${target}`);
 console.log(`[qa] extension id: ${id}`);
 console.log(`[qa] popup page: chrome-extension://${keyB64 ? id : '<id>'}/src/popup/popup.html`);
+
+return { extensionId: keyB64 ? id : null };
+}
+
+// --- CLI entry --------------------------------------------------------------
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    buildQaCopy({
+      source: argValue('--source'),
+      target: argValue('--target'),
+      keyFile: argValue('--key-file'),
+      // argValue yields null for omitted flags; null would defeat the
+      // destructuring defaults in buildQaCopy.
+      apiOrigin: argValue('--api-origin') ?? undefined,
+      pageOrigin: argValue('--page-origin') ?? undefined,
+    });
+  } catch (err) {
+    console.error('Usage: node tests/qa/build-qa-copy.js --source <repo-root> --target <dir> [--key-file <pem>]');
+    console.error(String(err.message ?? err));
+    process.exit(1);
+  }
+}
