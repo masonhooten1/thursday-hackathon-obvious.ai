@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+/*
+ * Light-mode shell for the search UI. Dark mode and the full design pass land
+ * with the traveler-UX task — this scaffold keeps styling boring on purpose.
+ */
+
+:root {
+  --background: #fafaf9;
+  --foreground: #1c1917;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
