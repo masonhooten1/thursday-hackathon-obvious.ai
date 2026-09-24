@@ -26,15 +26,30 @@ $do$;
 -- Supabase-style roles when running outside Supabase. `authenticated` is the
 -- RLS-subjected role for user JWT sessions; `service_role` bypasses RLS the
 -- way Supabase's does.
-do $$
+-- Role creation must tolerate a concurrent creator: Vitest workers apply
+-- this schema to separate scratch databases in parallel, but roles are
+-- cluster-wide, so two check-then-create races can interleave. Depending
+-- on timing Postgres raises either duplicate_object (42710) or the raw
+-- catalog unique_violation (23505) from pg_authid_rolname_index — both
+-- mean the role already exists, which is the outcome we want.
+do $roles$
 begin
   if not exists (select 1 from pg_roles where rolname = 'authenticated') then
-    create role authenticated nologin;
+    begin
+      create role authenticated nologin;
+    exception
+      when duplicate_object or unique_violation then null;
+    end;
   end if;
   if not exists (select 1 from pg_roles where rolname = 'service_role') then
-    create role service_role nologin bypassrls;
+    begin
+      create role service_role nologin bypassrls;
+    exception
+      when duplicate_object or unique_violation then null;
+    end;
   end if;
-end $$;
+end
+$roles$;
 
 -- Supabase grants its roles usage on schema auth by default; a stock
 -- Postgres does not, so policy evaluation of auth.uid() would fail there.
