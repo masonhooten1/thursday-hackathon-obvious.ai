@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-24T20:41:36Z",
+  "parks": [
+    {
+      "id": "glacier",
+      "name": "Glacier National Park",
+      "state": "Montana",
+      "lat": 48.684147,
+      "lng": -113.800931
+    },
+    {
+      "id": "grand-canyon",
+      "name": "Grand Canyon National Park",
+      "state": "Arizona",
+      "lat": 36.000117,
+      "lng": -112.121516
+    },
+    {
+      "id": "great-smoky-mountains",
+      "name": "Great Smoky Mountains National Park",
+      "state": "Tennessee",
+      "lat": 35.601164,
+      "lng": -83.508183
+    },
+    {
+      "id": "yellowstone",
+      "name": "Yellowstone National Park",
+      "state": "Wyoming",
+      "lat": 44.598244,
+      "lng": -110.547169
+    },
+    {
+      "id": "yosemite",
+      "name": "Yosemite National Park",
+      "state": "California",
+      "lat": 37.848833,
+      "lng": -119.557187
+    },
+    {
+      "id": "zion",
+      "name": "Zion National Park",
+      "state": "Utah",
+      "lat": 37.298393,
+      "lng": -113.026514
+    }
+  ]
+}
