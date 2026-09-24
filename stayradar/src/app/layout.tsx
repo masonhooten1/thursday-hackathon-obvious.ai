@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "StayRadar — Vacation rentals by radius",
   description:
-    "Vacation rental aggregation with real availability and radius-native search. Demo scaffold — inventory is fixture data.",
+    "Vacation rental aggregation with real availability and radius-native search — find stays near the places you want to be.",
 };
 
 export default function RootLayout({
