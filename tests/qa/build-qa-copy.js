@@ -89,6 +89,25 @@ if (manifest.web_accessible_resources) {
   }));
 }
 
+// (3c) the pill's click-time re-validation removes the pill when the host is
+// not linkedin.com (correct shipped behavior — a client-side navigation away
+// must not spend a lookup). The local stand-in page lives on 127.0.0.1, so the
+// disposable copy accepts that one extra host or every pill click self-removes.
+const detectPath = path.join(target, 'src', 'content', 'detect.js');
+const detectSource = readFileSync(detectPath, 'utf8');
+const hostCheck = 'if (!LINKEDIN_HOST.test(parsed.hostname)) return null;';
+if (!detectSource.includes(hostCheck)) {
+  throw new Error(`qa build: detect.js host check not found — update the (3c) patch`);
+}
+const stubHost = new URL(pageOrigin).hostname;
+writeFileSync(
+  detectPath,
+  detectSource.replace(
+    hostCheck,
+    `if (!LINKEDIN_HOST.test(parsed.hostname) && parsed.hostname !== '${stubHost}') return null;`,
+  ),
+);
+
 writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
 // (1) the endpoint override module + its import at the top of the worker.
