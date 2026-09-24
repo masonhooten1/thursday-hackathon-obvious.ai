@@ -1,0 +1,8 @@
+# Ingestion pipeline CI/test dependencies (lightweight: no torch, no open_clip).
+# The real run's model deps (torch, open_clip_torch) are installed on the sandbox only.
+numpy
+pyarrow
+pillow
+lancedb
+pytest
+ruff==0.16.8  # pin: same as api/requirements-dev.txt; CI-vs-local drift breaks isort

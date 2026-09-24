@@ -1,10 +1,10 @@
 [tool.pytest.ini_options]
-pythonpath = ["api"]
-testpaths = ["api/tests"]
+pythonpath = ["api", "."]
+testpaths = ["api/tests", "pipeline/tests"]
 
 [tool.ruff]
 line-length = 100
-src = ["api"]
+src = ["api", "pipeline"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
