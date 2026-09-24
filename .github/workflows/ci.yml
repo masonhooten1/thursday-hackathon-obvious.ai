@@ -71,7 +71,7 @@ jobs:
         run: pip install -r api/requirements.txt
 
       - name: Pytest
-        run: pytest api/tests/test_health.py -v
+        run: pytest api/tests -v
 
   pipeline:
     name: Ingestion pipeline pytest

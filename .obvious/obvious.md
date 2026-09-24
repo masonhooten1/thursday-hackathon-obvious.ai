@@ -24,9 +24,10 @@ Five projects share this monorepo:
    `docs/qa/` with the capture harness in `tests/qa/` (stub server, disposable QA copy). Remaining:
    the live-provider response fixture (V3). Spec: art_n2m5gMDY.
 3. **Plant ID web app** in `web/` (Next.js) and `api/` (FastAPI): identify screen with the four
-   UI states (upload, identifying, results, low-confidence) + mock-default API client;
-   `GET /health`. Ingestion pipeline lives in `pipeline/` (merged, PR #10); the identify API
-   and eval harness are follow-up PRs (blueprint art_t8aXEd4u).
+   UI states (upload, identifying, results, low-confidence) + mock-default API client.
+   Ingestion pipeline lives in `pipeline/` (merged, PR #10); the identify API
+   (`POST /api/identify`, `api/app/`) ships in a follow-up PR; the eval harness is a
+   follow-up (blueprint art_t8aXEd4u).
 4. **SignalPlan** in `signalplan/`: Next.js 15 + TypeScript foundation — frozen Zod contracts
    (`lib/contracts`), Supabase schema + RLS, fail-closed auth, six authenticated API routes,
    Trigger.dev v4 scaffolding. Spec: art_zjmuRNQY.
