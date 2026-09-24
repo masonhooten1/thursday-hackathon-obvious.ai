@@ -1,6 +1,6 @@
 "use client";
 
-import type { AccountPlan, Company, RunStatus } from "@/lib/contracts";
+import type { AccountPlan, Company, PublicIntegrationStatus, RunStatus } from "@/lib/contracts";
 import type { DataProvenance, EvidenceVintage } from "@/lib/vintage";
 
 /**
@@ -50,14 +50,14 @@ export const RUN_STATUS_LABEL: Record<RunStatus, string> = {
   partial: "Partial",
 };
 
-const HUBSPOT_LABEL: Record<Company["hubspotEvidence"]["publicIntegration"], string> = {
+const HUBSPOT_LABEL: Record<PublicIntegrationStatus, string> = {
   observed: "HubSpot observed",
   probable: "HubSpot probable",
   not_observed: "Not observed",
   scan_incomplete: "Scan incomplete",
 };
 
-const HUBSPOT_TONE: Record<Company["hubspotEvidence"]["publicIntegration"], string> = {
+const HUBSPOT_TONE: Record<PublicIntegrationStatus, string> = {
   observed: "chip-green",
   probable: "chip-teal",
   not_observed: "chip-gray",
@@ -67,7 +67,9 @@ const HUBSPOT_TONE: Record<Company["hubspotEvidence"]["publicIntegration"], stri
 /**
  * Public integration evidence chip. The note variants separate "uses HubSpot
  * as its internal CRM" from "public integration observed" — the chip only
- * ever describes the latter, and a negative is qualified accordingly.
+ * ever describes the latter, and a negative is qualified accordingly. A null
+ * evidence object means the check has not run yet, which is unlabeled data,
+ * not a negative result.
  */
 export function HubspotChip({
   evidence,
@@ -76,6 +78,7 @@ export function HubspotChip({
   evidence: Company["hubspotEvidence"];
   withNote?: boolean;
 }) {
+  if (!evidence) return <span className="chip chip-gray">Not yet checked</span>;
   return (
     <span className="row" style={{ gap: 6, flexWrap: "nowrap" }}>
       <span className={`chip ${HUBSPOT_TONE[evidence.publicIntegration]}`}>
@@ -127,17 +130,15 @@ export const PROVENANCE_BANNER_LABEL: Record<DataProvenance, string> = {
 
 const REVIEW_LABEL: Record<AccountPlan["status"], string> = {
   draft: "Draft",
+  review: "In review",
   ready: "Review ready",
-  needs_revision: "Needs revision",
-  approved: "Approved",
   exported: "Exported",
 };
 
 const REVIEW_TONE: Record<AccountPlan["status"], string> = {
   draft: "chip-gray",
+  review: "chip-amber",
   ready: "chip-blue",
-  needs_revision: "chip-red",
-  approved: "chip-green",
   exported: "chip-teal",
 };
 

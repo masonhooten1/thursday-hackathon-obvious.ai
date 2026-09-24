@@ -1,6 +1,11 @@
 "use client";
 
-import type { Export, ExportKind, ModelSettingsMetadata, Run } from "@/lib/contracts";
+import type {
+  Campaign,
+  Export,
+  ModelSettingsMetadata,
+  Run,
+} from "@/lib/contracts";
 import { apiFetch } from "@/lib/api-client";
 import type { CompanyAuditBundle } from "@/lib/repositories/types";
 import type { DataSources, RunStatusPayload } from "@/lib/data-source";

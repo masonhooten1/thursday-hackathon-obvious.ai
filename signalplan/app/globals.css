@@ -484,3 +484,70 @@ table.board tr.clickable:hover td {
     min-height: auto;
   }
 }
+
+/* ── Dashboard layout (feat/dashboard) ──────────────────────────────────── */
+
+.banner-warn {
+  /* Base .banner already carries the warning palette; alias for readability. */
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.page-narrow {
+  max-width: 460px;
+  margin: 8vh auto 0;
+}
+
+.exit-preview {
+  align-self: center;
+  margin-top: 4px;
+}
+
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px 16px;
+  margin: 8px 0 12px;
+}
+
+.fact-grid dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+
+.fact-grid dd {
+  margin: 2px 0 0;
+  font-size: 13px;
+}
+
+.mini-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mini-table th,
+.mini-table td {
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+button.link {
+  border: none;
+  background: none;
+  color: var(--accent);
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+button.link:disabled {
+  cursor: not-allowed;
+}

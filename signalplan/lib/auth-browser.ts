@@ -57,3 +57,17 @@ export function setPreviewCookie(value: boolean): void {
   if (value) document.cookie = `${PREVIEW_COOKIE}=fixtures; path=/; sameSite=lax`;
   else document.cookie = `${PREVIEW_COOKIE}=; path=/; max-age=0`;
 }
+
+/** Clears the local session everywhere it lives and revokes the Supabase token. */
+export async function signOut(): Promise<void> {
+  storeAccessToken(null);
+  setSessionCookie(false);
+  try {
+    await supabaseBrowser()?.auth.signOut();
+  } catch (err) {
+    // Local cleanup already happened; a failed remote revoke must not strand
+    // the user on a "signed in" UI. The API routes re-verify every request,
+    // so a stale token grants nothing.
+    console.error("signOut: remote revoke failed", err);
+  }
+}
