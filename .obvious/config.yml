@@ -1,0 +1,5 @@
+# Obvious repository policy
+branches:
+  default: main
+merge:
+  method: squash
