@@ -225,8 +225,8 @@ async function loadMarketCluster(db: StayRadarDb, market: string): Promise<Marke
     min_nightly: number | null;
   }>(sql`
     SELECT
-      ST_Y(ST_Centroid(ST_Collect(location)::geometry))::float8 AS latitude,
-      ST_X(ST_Centroid(ST_Collect(location)::geometry))::float8 AS longitude,
+      ST_Y(ST_Centroid(ST_Collect(location::geometry)))::float8 AS latitude,
+      ST_X(ST_Centroid(ST_Collect(location::geometry)))::float8 AS longitude,
       COUNT(*)::int AS property_count,
       MIN(base_nightly)::float8 AS min_nightly
     FROM properties
@@ -308,8 +308,12 @@ export async function generateCampaign(
   return row;
 }
 
-export async function listCampaigns(db: StayRadarDb): Promise<CampaignRow[]> {
-  return db.select().from(campaigns).orderBy(desc(campaigns.generatedAt));
+export async function listCampaigns(db: StayRadarDb, market?: string): Promise<CampaignRow[]> {
+  // Drizzle 0.45 rejects `.where(undefined)` at execution — branch instead.
+  const filtered = market
+    ? db.select().from(campaigns).where(eq(campaigns.market, market))
+    : db.select().from(campaigns);
+  return filtered.orderBy(desc(campaigns.generatedAt));
 }
 
 export async function getCampaign(db: StayRadarDb, id: string): Promise<CampaignRow | null> {
