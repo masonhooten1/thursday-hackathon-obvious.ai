@@ -44,5 +44,7 @@ export const createRunInputSchema = z.object({
   /** 1–25 first-party company domains. Search discovery is deferred. */
   domains: z.array(z.string().min(1).max(2000)).min(1).max(25),
   query: z.string().optional(),
+  // Header Idempotency-Key takes precedence; body fallback for convenience.
+  idempotencyKey: z.string().min(8).max(200).optional(),
 });
 export type CreateRunInput = z.infer<typeof createRunInputSchema>;

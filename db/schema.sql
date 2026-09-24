@@ -243,6 +243,14 @@ create index if not exists agent_runs_company_idx on agent_runs (company_id);
 create index if not exists account_plans_company_idx on account_plans (company_id);
 create index if not exists exports_company_idx on exports (company_id);
 
+-- Idempotency guarantees (acceptance check 5): a retry or resumed run never
+-- duplicates companies, and a retried export request never creates a second
+-- active export. The partial index matches the get-or-create upsert.
+create unique index if not exists companies_campaign_domain_uq
+  on companies (campaign_id, domain);
+create unique index if not exists exports_company_kind_active_uq
+  on exports (company_id, kind) where status <> 'failed';
+
 create or replace function touch_updated_at() returns trigger
 language plpgsql as $fn$
 begin
