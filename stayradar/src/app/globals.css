@@ -14,3 +14,31 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/*
+ * MapLibre markers are created outside React's DOM (maplibre-gl Marker),
+ * so their styling lives here rather than in Tailwind utility classes.
+ * map-view sets `sr-marker` (plus `sr-marker-selected` when chosen) on the
+ * button element itself — the pin shows the stay's nightly price.
+ */
+
+.sr-marker {
+  cursor: pointer;
+  display: block;
+  border-radius: 9999px;
+  border: 1px solid rgb(15 118 110);
+  background: rgb(255 255 255);
+  color: rgb(15 118 110);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+  white-space: nowrap;
+}
+
+.sr-marker-selected {
+  background: rgb(15 118 110);
+  color: rgb(255 255 255);
+  transform: scale(1.12);
+  z-index: 1;
+}
