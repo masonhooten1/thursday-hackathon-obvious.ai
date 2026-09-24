@@ -1,0 +1,34 @@
+# --- Node / Next.js (web/) ---
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# --- Models, datasets, and generated artifacts (ingestion/eval land later) ---
+models/
+data/
+*.lance/
+*.pt
+*.onnx
+*.gguf
+*.safetensors
+*.ckpt
+*.mlpackage
+*.mlmodel
+eval.json
+
+# --- Environment & misc ---
+.env*
+!.env.example
+.DS_Store
+coverage/
