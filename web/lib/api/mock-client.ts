@@ -2,6 +2,16 @@ import type { IdentifyClient } from "./client";
 import { IdentifyError } from "./types";
 import type { ConfidenceTier, IdentifyResponse, Match } from "./types";
 import { MAX_IMAGE_BYTES, isImageFile } from "../image-limits";
+import demoSpecies from "./demo-species.json";
+
+/** Species metadata seeded from the reference index (scripts/demo/seed_species.py). */
+interface DemoSpecies {
+  species_id: string;
+  scientific_name: string;
+  common_name: string | null;
+}
+
+const SEEDED = demoSpecies as { model_version: string; species: DemoSpecies[] };
 
 /** Simulated server latency so the identifying state is observable in demos. */
 const MOCK_LATENCY_MS = 1200;
@@ -17,58 +27,43 @@ function leafThumbnail(shade: string): string {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
-function fixtureMatch(
-  speciesId: string,
-  scientificName: string,
-  commonName: string | null,
-  distance: number,
-  confidence: ConfidenceTier,
-  shade: string,
-): Match {
+const SHADES = ["#2f6b3a", "#3d7a4a", "#5b8c5a", "#6f9a6b", "#84a87e"];
+
+/** Match shape of the real top-5: distances descending, tiers degrading. */
+const HIGH_DISTANCES = [0.18, 0.26, 0.34, 0.47, 0.58];
+const HIGH_TIERS: ConfidenceTier[] = ["high", "high", "medium", "medium", "low"];
+const LOW_DISTANCES = [0.83, 0.9, 0.94, 0.96, 0.97];
+
+function fixtureResponse(latencyMs: number, lowConfidence: boolean): IdentifyResponse {
+  const distances = lowConfidence ? LOW_DISTANCES : HIGH_DISTANCES;
+  const tiers: ConfidenceTier[] = lowConfidence
+    ? ["low", "low", "low", "low", "low"]
+    : HIGH_TIERS;
   return {
-    species_id: speciesId,
-    scientific_name: scientificName,
-    common_name: commonName,
-    distance,
-    confidence,
-    reference_image: leafThumbnail(shade),
+    model_version: SEEDED.model_version,
+    latency_ms: latencyMs,
+    low_confidence: lowConfidence,
+    matches: SEEDED.species.slice(0, 5).map((entry, index): Match => {
+      const shade = SHADES[index % SHADES.length]!;
+      return {
+        species_id: entry.species_id,
+        scientific_name: entry.scientific_name,
+        common_name: entry.common_name,
+        distance: distances[index]!,
+        confidence: tiers[index]!,
+        reference_image: leafThumbnail(shade),
+      };
+    }),
   };
 }
-
-const HIGH_CONFIDENCE_FIXTURE: IdentifyResponse = {
-  model_version: "bioclip2-vit-b16",
-  latency_ms: 1180,
-  low_confidence: false,
-  matches: [
-    fixtureMatch("30056", "Acer macrophyllum", "bigleaf maple", 0.18, "high", "#2f6b3a"),
-    fixtureMatch("30058", "Acer circinatum", "vine maple", 0.26, "high", "#3d7a4a"),
-    fixtureMatch("30112", "Platanus racemosa", "western sycamore", 0.34, "medium", "#5b8c5a"),
-    fixtureMatch("29987", "Acer platanoides", "Norway maple", 0.47, "medium", "#6f9a6b"),
-    fixtureMatch("30061", "Acer glabrum", "Rocky Mountain maple", 0.58, "low", "#84a87e"),
-  ],
-};
-
-const LOW_CONFIDENCE_FIXTURE: IdentifyResponse = {
-  model_version: "bioclip2-vit-b16",
-  latency_ms: 1240,
-  low_confidence: true,
-  matches: [
-    fixtureMatch("30056", "Acer macrophyllum", "bigleaf maple", 0.83, "low", "#2f6b3a"),
-    fixtureMatch("30058", "Acer circinatum", "vine maple", 0.9, "low", "#3d7a4a"),
-    fixtureMatch("30112", "Platanus racemosa", "western sycamore", 0.94, "low", "#5b8c5a"),
-    fixtureMatch("29987", "Acer platanoides", "Norway maple", 0.96, "low", "#6f9a6b"),
-    fixtureMatch("30061", "Acer glabrum", "Rocky Mountain maple", 0.97, "low", "#84a87e"),
-  ],
-};
 
 /**
  * Fixture selection is deterministic on the file so demos and tests can reach
  * every state: files named "unknown…" identify as low-confidence.
  */
 function fixtureFor(image: File): IdentifyResponse {
-  return image.name.toLowerCase().includes("unknown")
-    ? LOW_CONFIDENCE_FIXTURE
-    : HIGH_CONFIDENCE_FIXTURE;
+  const lowConfidence = image.name.toLowerCase().includes("unknown");
+  return fixtureResponse(lowConfidence ? 1240 : 1180, lowConfidence);
 }
 
 function abortError(): DOMException {

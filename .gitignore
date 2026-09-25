@@ -37,6 +37,10 @@ apps/mobile/dist/
 *.mlpackage
 *.mlmodel
 eval.json
+# Calibrated tiers are pinned constants (blueprint: "measured, not vibes") and
+# are versioned here deliberately; when a new index release re-calibrates,
+# update this file in the same change as the PLANT_EVAL_RELEASE bump.
+# api/config/
 
 # --- Environment & misc ---
 .env*

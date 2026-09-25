@@ -1,0 +1,11 @@
+# Eval-harness and demo dependencies beyond the shared pipeline/api
+# requirements: the real BioCLIP 2 embedder. CPU-only wheels keep CI and the
+# CPU-only demo sandbox lean. Install order matters (torch first, so
+# open_clip_torch does not pull CUDA wheels):
+#
+#   pip install -r requirements-eval.txt
+#   pip install -r pipeline/requirements.txt -r api/requirements.txt
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.14.0
+torchvision==0.29.0
+open_clip_torch==3.3.0

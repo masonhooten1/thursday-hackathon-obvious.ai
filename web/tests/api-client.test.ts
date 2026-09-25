@@ -1,8 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createIdentifyClient, isAbortError } from "@/lib/api/client";
+import demoSpecies from "@/lib/api/demo-species.json";
 import { LiveIdentifyClient, parseIdentifyResponse } from "@/lib/api/live-client";
 import { MockIdentifyClient } from "@/lib/api/mock-client";
 import { IdentifyError } from "@/lib/api/types";
+
+// The mock's fixtures are built from the seeded catalog; assert against the
+// seed itself so re-seeding after a new index build never breaks this test.
+const SEEDED_SPECIES = (
+  demoSpecies as { model_version: string; species: { scientific_name: string }[] }
+).species;
 
 function photo(name = "leaf.jpg", type = "image/jpeg", size = 10): File {
   const file = new File(["jpeg-bytes"], name, { type });
@@ -61,7 +68,7 @@ describe("MockIdentifyClient", () => {
     const response = await new MockIdentifyClient(0).identify(photo());
     expect(response.low_confidence).toBe(false);
     expect(response.matches).toHaveLength(5);
-    expect(response.matches[0]!.scientific_name).toBe("Acer macrophyllum");
+    expect(response.matches[0]!.scientific_name).toBe(SEEDED_SPECIES[0]!.scientific_name);
   });
 
   it("resolves the low-confidence fixture for files named unknown*", async () => {

@@ -35,3 +35,22 @@ def load_holdout_paths(manifest_path: Path) -> set[str]:
     """Paths excluded from the index, as written by build_holdout_manifest."""
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     return {entry["image_path"] for entry in payload["holdout"].values()}
+
+
+def load_holdout_mapping(manifest_path: Path) -> dict[str, str]:
+    """{species_id: image_path} from the manifest, validated.
+
+    fetch_holdout resolves these files onto disk and eval embeds them; both
+    fail loudly here rather than silently evaluating an empty or malformed set.
+    """
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    holdout = payload.get("holdout")
+    if not isinstance(holdout, dict) or not holdout:
+        raise ValueError(f"{manifest_path}: missing or empty 'holdout' mapping")
+    mapping: dict[str, str] = {}
+    for species, entry in holdout.items():
+        image_path = entry.get("image_path") if isinstance(entry, dict) else entry
+        if not isinstance(image_path, str) or not image_path:
+            raise ValueError(f"{manifest_path}: holdout entry for {species!r} has no image_path")
+        mapping[species] = image_path
+    return mapping
