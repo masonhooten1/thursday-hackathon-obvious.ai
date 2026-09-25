@@ -53,9 +53,9 @@ export class SearchValidationError extends Error {
 /**
  * Run a radius search and record the first-party search event behind it.
  *
- * Window semantics (per spec): a booked/blocked date anywhere inside
- * [checkIn, checkOut] disqualifies the property — the window is treated as
- * inclusive of the checkout day.
+ * Window semantics (per spec): a booked/blocked NIGHT anywhere in
+ * [checkIn, checkOut) disqualifies the property — the guest departs on the
+ * checkout day, so that day's calendar status is irrelevant.
  *
  * Throws SearchValidationError for invalid input (routes map that to 400);
  * an empty result set is a valid, typed response.
@@ -87,13 +87,15 @@ export async function searchProperties(
       NOT EXISTS (
         SELECT 1 FROM availability bad
         WHERE bad.property_id = p.id
-          AND bad.date BETWEEN ${q.checkIn} AND ${q.checkOut}
+          AND bad.date >= ${q.checkIn}
+          AND bad.date < ${q.checkOut}
           AND bad.status <> 'available'
       ) AS available_for_window
     FROM properties p
     LEFT JOIN availability a
       ON a.property_id = p.id
-      AND a.date BETWEEN ${q.checkIn} AND ${q.checkOut}
+      AND a.date >= ${q.checkIn}
+      AND a.date < ${q.checkOut}
       AND a.status = 'available'
     WHERE ST_DWithin(
       p.location,
@@ -107,7 +109,8 @@ export async function searchProperties(
     AND NOT EXISTS (
       SELECT 1 FROM availability bad
       WHERE bad.property_id = p.id
-        AND bad.date BETWEEN ${q.checkIn} AND ${q.checkOut}
+        AND bad.date >= ${q.checkIn}
+        AND bad.date < ${q.checkOut}
         AND bad.status <> 'available'
     )
     GROUP BY p.id

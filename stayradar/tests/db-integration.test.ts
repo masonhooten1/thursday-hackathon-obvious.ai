@@ -220,15 +220,21 @@ describe.skipIf(!databaseUrl)("inventory ingestion + radius search", () => {
       { ...base, externalId: "geo-far", slug: "geo-far", title: "Far House", propertyType: "house", maxGuests: 4, bedrooms: 2, baseNightly: 200, location: { latitude: CENTER.latitude + latOffset(30), longitude: CENTER.longitude } },
       { ...base, externalId: "geo-window-blocked", slug: "geo-window-blocked", title: "Blocked Cabin", propertyType: "cabin", maxGuests: 4, bedrooms: 2, baseNightly: 200, location: { latitude: CENTER.latitude, longitude: CENTER.longitude + 0.02 } },
       { ...base, externalId: "geo-small", slug: "geo-small", title: "Studio", propertyType: "cabin", maxGuests: 1, bedrooms: 1, baseNightly: 120, location: CENTER },
+      { ...base, externalId: "geo-checkout-booked", slug: "geo-checkout-booked", title: "Checkout Booked Cabin", propertyType: "cabin", maxGuests: 4, bedrooms: 2, baseNightly: 200, location: { latitude: CENTER.latitude + 0.005, longitude: CENTER.longitude } },
     ];
     // geo-cheap: two cheap available nights inside window W1.
     // geo-window-blocked: booked on 2027-03-14 — inside W1, outside W2.
+    // geo-checkout-booked: booked only on 2027-03-16, the checkout day of W1 —
+    // stay nights are [checkIn, checkOut), so that row must not disqualify.
     inputs[1].availability = [
       { date: "2027-03-13", status: "available", nightlyPrice: 120 },
       { date: "2027-03-14", status: "available", nightlyPrice: 90 },
     ];
     inputs[5].availability = [
       { date: "2027-03-14", status: "booked", nightlyPrice: null },
+    ];
+    inputs[7].availability = [
+      { date: "2027-03-16", status: "booked", nightlyPrice: null },
     ];
 
     beforeAll(async () => {
@@ -248,16 +254,23 @@ describe.skipIf(!databaseUrl)("inventory ingestion + radius search", () => {
       const response = await searchProperties(db, query);
       const slugs = response.results.map((result) => result.slug);
 
-      // Inside: center + cheap + boundary-inside. Excluded: boundary-outside
-      // (25.02 mi), far (30 mi), window-blocked (booked night in window),
-      // studio (maxGuests 1 < 2 guests).
-      expect(slugs).toEqual(["geo-in", "geo-cheap", "geo-boundary-in"]);
-      expect(response.total).toBe(3);
+      // Inside: center + checkout-booked (its only booked night is the W1
+      // checkout day — not a stay night) + cheap + boundary-inside. Excluded:
+      // boundary-outside (25.02 mi), far (30 mi), window-blocked (booked
+      // night in window), studio (maxGuests 1 < 2 guests).
+      expect(slugs).toEqual([
+        "geo-in",
+        "geo-checkout-booked",
+        "geo-cheap",
+        "geo-boundary-in",
+      ]);
+      expect(response.total).toBe(4);
 
       const distances = response.results.map((result) => result.distanceMiles);
       expect(distances).toEqual([...distances].sort((a, b) => a - b));
-      expect(response.results[2]?.distanceMiles).toBeGreaterThan(24.9);
-      expect(response.results[2]?.distanceMiles).toBeLessThan(25.0);
+      const boundary = response.results.find((r) => r.slug === "geo-boundary-in");
+      expect(boundary?.distanceMiles).toBeGreaterThan(24.9);
+      expect(boundary?.distanceMiles).toBeLessThan(25.0);
     });
 
     it("disqualifies a property with a booked date inside the requested window", async () => {
@@ -273,6 +286,44 @@ describe.skipIf(!databaseUrl)("inventory ingestion + radius search", () => {
       expect(clearWindow.results.map((r) => r.slug)).toContain("geo-window-blocked");
     });
 
+    it("treats the checkout day as a departure, not a required night", async () => {
+      // A property booked only on the checkout day of the window (2027-03-16,
+      // the day the guest departs) is still bookable: stay nights are
+      // [checkIn, checkOut), so 03-16's status is irrelevant.
+      const checkoutOnly = await searchProperties(db, query);
+      const match = checkoutOnly.results.find((r) => r.slug === "geo-checkout-booked");
+      expect(match).toBeDefined();
+      expect(match?.availableForWindow).toBe(true);
+
+      // The same property vanishes the moment a night strictly inside the
+      // stay is booked — the checkout-day exclusion must not overcorrect.
+      const property = (
+        await db
+          .select()
+          .from(properties)
+          .where(and(eq(properties.source, "test-geo"), eq(properties.externalId, "geo-checkout-booked")))
+      )[0];
+      expect(property).toBeDefined();
+      // The fixture has no 03-15 row yet — book one strictly inside the stay.
+      await db.insert(availability).values({
+        propertyId: property.id,
+        date: "2027-03-15",
+        status: "booked",
+        nightlyPrice: null,
+      });
+      try {
+        const interiorBooked = await searchProperties(db, query);
+        expect(interiorBooked.results.map((r) => r.slug)).not.toContain("geo-checkout-booked");
+        // Sibling inventory with a clear interior is unaffected.
+        expect(interiorBooked.results.map((r) => r.slug)).toContain("geo-in");
+      } finally {
+        // Restore the fixture exactly as ingested so later tests see it.
+        await db
+          .delete(availability)
+          .where(and(eq(availability.propertyId, property.id), eq(availability.date, "2027-03-15")));
+      }
+    });
+
     it("prices the window from the cheapest available night, falling back to base", async () => {
       const response = await searchProperties(db, query);
       const cheap = response.results.find((r) => r.slug === "geo-cheap");
@@ -281,9 +332,11 @@ describe.skipIf(!databaseUrl)("inventory ingestion + radius search", () => {
       const center = response.results.find((r) => r.slug === "geo-in");
       expect(center?.minNightly).toBe(200); // no calendar rows → base rate
 
-      // Outside the booked night's window both cheap nights are bookable.
+      // Half-open window [2027-03-12, 2027-03-14): only the 03-13 night is
+      // priced — 03-14 is the checkout day and must not drag the minimum
+      // down to its 90 rate.
       const later = await searchProperties(db, { ...query, checkIn: "2027-03-12", checkOut: "2027-03-14" });
-      expect(later.results.find((r) => r.slug === "geo-cheap")?.minNightly).toBe(90);
+      expect(later.results.find((r) => r.slug === "geo-cheap")?.minNightly).toBe(120);
     });
 
     it("filters by guests and property type", async () => {
