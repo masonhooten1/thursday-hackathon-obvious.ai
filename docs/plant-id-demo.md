@@ -40,10 +40,11 @@ automatic swap (spec Risk R1).
 `.github/workflows/eval.yml` runs `make eval` in CI against two release
 assets: `index.tar.gz` (unpacks to `data/lancedb/` + `api/config/`) and
 `holdout-images.tar.gz` (unpacks to `data/images/`). Both are cached and keyed
-on the `PLANT_EVAL_RELEASE` repo variable (default
-`plantnet-eval-partial-9000`); BioCLIP 2 weights come from the HF cache. When
-the full index ships, bump `PLANT_EVAL_RELEASE` to the new release tag — the
-cache key follows it. `eval.json` is uploaded as a CI artifact on every run.
+on the release tag (default `plantnet-eval-full-11953`; a repo admin's
+`PLANT_EVAL_RELEASE` variable, if ever set, overrides it); BioCLIP 2 weights
+come from the HF cache. When the ingestion pipeline re-ships the index, point
+the workflow default at the new release tag — the cache key follows it.
+`eval.json` is uploaded as a CI artifact on every run.
 
 ## Hosted demo
 
