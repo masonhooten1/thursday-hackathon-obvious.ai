@@ -6,7 +6,7 @@ Hackathon monorepo with five projects sharing the repo:
 - **LinkedIn to Email** — Chrome (Manifest V3) extension at the repo root.
 - **Plant ID from photos** — Next.js + FastAPI web app in `web/` and `api/`.
 - **SignalPlan** — marketing-audit app in `signalplan/` (see `signalplan/README.md`).
-- **StayRadar** — accommodation-market research shell in `stayradar/`.
+- **StayRadar** — vacation rental aggregation + radius-native marketing in `stayradar/`.
 
 ---
 
@@ -231,13 +231,14 @@ TEST_DATABASE_URL="postgresql://user@127.0.0.1:54322/postgres" npx vitest run   
 
 ## StayRadar (stayradar/)
 
-Accommodation-market research shell — Next.js (pnpm) with a fixture-backed search UI. Details in `stayradar/README.md`.
+Vacation rental aggregation with radius-native marketing: a map-first Next.js app (pnpm, TypeScript, Tailwind v4) for finding stays with real, date-keyed availability — Postgres 16 + PostGIS `ST_DWithin` radius search over 40 seeded properties across four markets — plus a marketing engine that turns first-party search behavior into Google Ads–shaped radius campaigns (segments, a generator enforcing Google's 1 km proximity floor, a deterministic mock Ads client, and JSON / Google Ads Editor–style CSV export). Bookings/payments, OTA scraping, and person-level location targeting are intentionally out of scope. Full runbook and architecture one-pager in [`stayradar/README.md`](stayradar/README.md); spec: Obvious blueprint art_XasJ5Kw8.
 
 ```bash
 pnpm --dir stayradar install
 pnpm --dir stayradar lint
-pnpm --dir stayradar test
+pnpm --dir stayradar test   # DB-backed integration suite needs TEST_DATABASE_URL — see stayradar/README.md
 pnpm --dir stayradar build
+pnpm --dir stayradar db:migrate && pnpm --dir stayradar db:seed   # needs Postgres 16 + PostGIS
 ```
 
 ---
