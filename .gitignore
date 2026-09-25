@@ -37,6 +37,9 @@ apps/mobile/dist/
 *.mlpackage
 *.mlmodel
 eval.json
+# Calibration tiers ship with the index release archive (computed at ingest
+# time from that index's hold-out distances) — never committed.
+api/config/
 
 # --- Environment & misc ---
 .env*

@@ -2,9 +2,16 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import IdentifyScreen from "@/components/IdentifyScreen";
 import type { IdentifyClient } from "@/lib/api/client";
+import demoSpecies from "@/lib/api/demo-species.json";
 import { MockIdentifyClient } from "@/lib/api/mock-client";
 import { IdentifyError } from "@/lib/api/types";
 import type { IdentifyResponse } from "@/lib/api/types";
+
+// The mock's fixtures come from the seeded catalog (scripts/demo/seed_species.py);
+// asserting against the seed keeps these tests valid across re-seeds.
+const SEEDED_SPECIES = (
+  demoSpecies as { model_version: string; species: { scientific_name: string; common_name: string | null }[] }
+).species;
 
 const MOCK_THUMBNAIL = "data:image/svg+xml,placeholder";
 
@@ -254,13 +261,11 @@ describe("results state", () => {
     const list = await screen.findByRole("list", { name: "Species matches, nearest first" });
     const rows = within(list).getAllByRole("listitem");
     expect(rows).toHaveLength(5);
-    expect(rows.map((row) => row.textContent)).toEqual([
-      expect.stringContaining("Acer macrophyllum"),
-      expect.stringContaining("Acer circinatum"),
-      expect.stringContaining("Platanus racemosa"),
-      expect.stringContaining("Acer platanoides"),
-      expect.stringContaining("Acer glabrum"),
-    ]);
+    expect(rows.map((row) => row.textContent)).toEqual(
+      SEEDED_SPECIES.slice(0, 5).map((species) =>
+        expect.stringContaining(species.scientific_name),
+      ),
+    );
 
     const meters = within(list).getAllByRole("meter");
     expect(meters.map((meter) => meter.getAttribute("aria-valuenow"))).toEqual([
@@ -280,7 +285,9 @@ describe("results state", () => {
     choosePhoto(photo());
     await screen.findByRole("list", { name: /species matches/i });
 
-    expect(screen.getByText("bigleaf maple")).toBeInTheDocument();
+    const named = SEEDED_SPECIES.slice(0, 5).find((species) => species.common_name);
+    expect(named).toBeDefined();
+    expect(screen.getByText(named!.common_name!)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Identify another photo" }));
     expect(screen.getByTestId("upload-affordance")).toBeInTheDocument();
   });
@@ -291,13 +298,14 @@ describe("results state", () => {
     choosePhoto(photo());
     await screen.findByRole("list", { name: /species matches/i });
 
+    const firstSeeded = SEEDED_SPECIES[0]!.scientific_name;
     const thumbnailButton = screen.getByRole("button", {
-      name: "Reference photo for Acer macrophyllum",
+      name: `Reference photo for ${firstSeeded}`,
     });
     fireEvent.click(thumbnailButton);
-    expect(screen.getByAltText("Reference photo of Acer macrophyllum")).toBeInTheDocument();
+    expect(screen.getByAltText(`Reference photo of ${firstSeeded}`)).toBeInTheDocument();
     fireEvent.click(thumbnailButton);
-    expect(screen.queryByAltText("Reference photo of Acer macrophyllum")).not.toBeInTheDocument();
+    expect(screen.queryByAltText(`Reference photo of ${firstSeeded}`)).not.toBeInTheDocument();
   });
 });
 

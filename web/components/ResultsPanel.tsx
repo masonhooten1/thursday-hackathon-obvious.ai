@@ -16,6 +16,60 @@ export function closenessPercent(distance: number): number {
   return Math.round(Math.min(Math.max(1 - distance, 0), 1) * 100);
 }
 
+function LeafGlyph() {
+  return (
+    <svg viewBox="0 0 112 112" width="100%" height="100%" aria-hidden="true">
+      <rect width="112" height="112" rx="12" fill="#e8ede6" />
+      <path
+        d="M56 20c-14 12-22 24-22 38 0 16 10 26 22 34 12-8 22-18 22-34 0-14-8-26-22-38z"
+        fill="#b9c7b4"
+      />
+      <path d="M56 28v58" stroke="#8fa68c" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/**
+ * Reference photo that degrades to a placeholder tile when the file is
+ * missing (the index can reference thumbnails a partial archive never
+ * shipped) instead of showing a broken image.
+ */
+export function ReferenceImage({
+  src,
+  alt,
+  missingAlt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  missingAlt: string;
+  className: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    const decorative = missingAlt === "";
+    return (
+      <span
+        className={`${className} thumbnail-placeholder`}
+        role={decorative ? undefined : "img"}
+        aria-label={decorative ? undefined : missingAlt}
+        aria-hidden={decorative || undefined}
+      >
+        <LeafGlyph />
+      </span>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setFailed(true)}
+      draggable={false}
+    />
+  );
+}
+
 export default function ResultsPanel({
   response,
   lowConfidence,
@@ -71,18 +125,20 @@ export default function ResultsPanel({
                 aria-label={`Reference photo for ${match.scientific_name}`}
                 onClick={() => toggleReference(match.species_id)}
               >
-                <img
+                <ReferenceImage
+                  key={match.reference_image}
                   src={match.reference_image}
                   alt=""
-                  width={56}
-                  height={56}
+                  missingAlt=""
                   className="thumbnail"
                 />
               </button>
               {expanded && (
-                <img
+                <ReferenceImage
+                  key={`expanded-${match.reference_image}`}
                   src={match.reference_image}
                   alt={`Reference photo of ${match.scientific_name}`}
+                  missingAlt={`Reference photo unavailable for ${match.scientific_name}`}
                   className="reference-large"
                 />
               )}

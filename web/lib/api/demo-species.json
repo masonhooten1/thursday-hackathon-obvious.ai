@@ -1,0 +1,420 @@
+{
+  "model_version": "bioclip2-vit-l14",
+  "species": [
+    {
+      "species_id": "1355868",
+      "scientific_name": "Lactuca virosa L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1355932",
+      "scientific_name": "Pelargonium graveolens L'H\u00e9r.",
+      "common_name": null
+    },
+    {
+      "species_id": "1355936",
+      "scientific_name": "Cirsium arvense (L.) Scop.",
+      "common_name": null
+    },
+    {
+      "species_id": "1355937",
+      "scientific_name": "Cirsium vulgare (Savi) Ten.",
+      "common_name": "bull thistle"
+    },
+    {
+      "species_id": "1355959",
+      "scientific_name": "Pelargonium peltatum (L.) L'H\u00e9r.",
+      "common_name": null
+    },
+    {
+      "species_id": "1355978",
+      "scientific_name": "Pelargonium zonale (L.) L'H\u00e9r.",
+      "common_name": "Horseshoe Geranium"
+    },
+    {
+      "species_id": "1355990",
+      "scientific_name": "Mercurialis annua L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1356022",
+      "scientific_name": "Hypericum perforatum L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1356075",
+      "scientific_name": "Tradescantia fluminensis Vell.",
+      "common_name": "Small-leaf Spiderwort"
+    },
+    {
+      "species_id": "1356111",
+      "scientific_name": "Lamium amplexicaule L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1356126",
+      "scientific_name": "Lavandula dentata L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1356257",
+      "scientific_name": "Melilotus albus Medik.",
+      "common_name": null
+    },
+    {
+      "species_id": "1356278",
+      "scientific_name": "Trifolium fragiferum L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1356382",
+      "scientific_name": "Dryopteris filix-mas (L.) Schott",
+      "common_name": null
+    },
+    {
+      "species_id": "1356420",
+      "scientific_name": "Nephrolepis cordifolia (L.) C. Presl",
+      "common_name": null
+    },
+    {
+      "species_id": "1356421",
+      "scientific_name": "Nephrolepis exaltata (L.) Schott",
+      "common_name": null
+    },
+    {
+      "species_id": "1356428",
+      "scientific_name": "Osmunda regalis L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1356692",
+      "scientific_name": "Lithodora fruticosa (L.) Griseb.",
+      "common_name": null
+    },
+    {
+      "species_id": "1356781",
+      "scientific_name": "Humulus lupulus L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1356816",
+      "scientific_name": "Vaccaria hispanica (Mill.) Rauschert",
+      "common_name": "China cockle"
+    },
+    {
+      "species_id": "1357330",
+      "scientific_name": "Calendula officinalis L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1357379",
+      "scientific_name": "Carthamus lanatus L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1357635",
+      "scientific_name": "Helminthotheca echioides (L.) Holub",
+      "common_name": null
+    },
+    {
+      "species_id": "1357652",
+      "scientific_name": "Hyoseris radiata L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1357677",
+      "scientific_name": "Lactuca muralis (L.) Gaertn.",
+      "common_name": null
+    },
+    {
+      "species_id": "1357705",
+      "scientific_name": "Limbarda crithmoides (L.) Dumort.",
+      "common_name": "Golden samphire"
+    },
+    {
+      "species_id": "1358094",
+      "scientific_name": "Sedum acre L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1358095",
+      "scientific_name": "Sedum album L.",
+      "common_name": "White Stonecrop"
+    },
+    {
+      "species_id": "1358105",
+      "scientific_name": "Sedum dasyphyllum L.",
+      "common_name": "thick-leaf stonecrop"
+    },
+    {
+      "species_id": "1358108",
+      "scientific_name": "Sedum forsterianum Sm.",
+      "common_name": null
+    },
+    {
+      "species_id": "1358133",
+      "scientific_name": "Sedum sediforme (Jacq.) Pau",
+      "common_name": null
+    },
+    {
+      "species_id": "1358150",
+      "scientific_name": "Alliaria petiolata (M. Bieb.) Cavara & Grande",
+      "common_name": null
+    },
+    {
+      "species_id": "1358519",
+      "scientific_name": "Acalypha virginica L.",
+      "common_name": "Virginia Three-seed Mercury"
+    },
+    {
+      "species_id": "1358605",
+      "scientific_name": "Mercurialis perennis L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1358689",
+      "scientific_name": "Hypericum androsaemum L.",
+      "common_name": "Tutsan"
+    },
+    {
+      "species_id": "1358699",
+      "scientific_name": "Hypericum hircinum L.",
+      "common_name": "Stinking Tutsan"
+    },
+    {
+      "species_id": "1358700",
+      "scientific_name": "Hypericum hirsutum L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1358701",
+      "scientific_name": "Hypericum humifusum L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1358710",
+      "scientific_name": "Hypericum tetrapterum Fr.",
+      "common_name": null
+    },
+    {
+      "species_id": "1358751",
+      "scientific_name": "Lamium hybridum Vill.",
+      "common_name": null
+    },
+    {
+      "species_id": "1358752",
+      "scientific_name": "Lamium purpureum L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1358766",
+      "scientific_name": "Lavandula stoechas L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359197",
+      "scientific_name": "Galega officinalis L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359483",
+      "scientific_name": "Trifolium angustifolium L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359485",
+      "scientific_name": "Trifolium arvense L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359486",
+      "scientific_name": "Trifolium aureum Pollich",
+      "common_name": null
+    },
+    {
+      "species_id": "1359488",
+      "scientific_name": "Trifolium campestre Schreb.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359497",
+      "scientific_name": "Trifolium hybridum L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359498",
+      "scientific_name": "Trifolium incarnatum L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359508",
+      "scientific_name": "Trifolium montanum L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359517",
+      "scientific_name": "Trifolium pratense L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359519",
+      "scientific_name": "Trifolium resupinatum L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359525",
+      "scientific_name": "Trifolium stellatum L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359616",
+      "scientific_name": "Punica granatum L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359620",
+      "scientific_name": "Alcea rosea L.",
+      "common_name": "common hollyhock"
+    },
+    {
+      "species_id": "1359622",
+      "scientific_name": "Althaea cannabina L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359625",
+      "scientific_name": "Althaea officinalis L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1359669",
+      "scientific_name": "Nymphaea alba L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1360148",
+      "scientific_name": "Adonis annua L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1360153",
+      "scientific_name": "Anemone coronaria L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1360550",
+      "scientific_name": "Hyoscyamus albus L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1360555",
+      "scientific_name": "Hyoscyamus niger L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1360588",
+      "scientific_name": "Daphne gnidium L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1360590",
+      "scientific_name": "Daphne laureola L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1360671",
+      "scientific_name": "Chaerophyllum temulum L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1360759",
+      "scientific_name": "Meum athamanticum Jacq.",
+      "common_name": null
+    },
+    {
+      "species_id": "1360811",
+      "scientific_name": "Thapsia villosa L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1360835",
+      "scientific_name": "Centranthus calcitrapae (L.) Dufr.",
+      "common_name": null
+    },
+    {
+      "species_id": "1360978",
+      "scientific_name": "Pancratium maritimum L.",
+      "common_name": "Sea-daffodil"
+    },
+    {
+      "species_id": "1360998",
+      "scientific_name": "Anthericum liliago L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1361024",
+      "scientific_name": "Butomus umbellatus L.",
+      "common_name": null
+    },
+    {
+      "species_id": "1361508",
+      "scientific_name": "Oncostema peruviana (L.) Speta",
+      "common_name": null
+    },
+    {
+      "species_id": "1361656",
+      "scientific_name": "Ophrys apifera Huds.",
+      "common_name": "Bee Orchid"
+    },
+    {
+      "species_id": "1361660",
+      "scientific_name": "Ophrys fusca Link",
+      "common_name": null
+    },
+    {
+      "species_id": "1361663",
+      "scientific_name": "Ophrys lutea Cav.",
+      "common_name": null
+    },
+    {
+      "species_id": "1361666",
+      "scientific_name": "Ophrys scolopax Cav.",
+      "common_name": null
+    },
+    {
+      "species_id": "1361668",
+      "scientific_name": "Ophrys speculum Link",
+      "common_name": null
+    },
+    {
+      "species_id": "1361672",
+      "scientific_name": "Ophrys tenthredinifera Willd.",
+      "common_name": null
+    },
+    {
+      "species_id": "1361745",
+      "scientific_name": "Myosoton aquaticum (L.) Moench",
+      "common_name": null
+    },
+    {
+      "species_id": "1361759",
+      "scientific_name": "Cirsium palustre (L.) Scop.",
+      "common_name": null
+    },
+    {
+      "species_id": "1361823",
+      "scientific_name": "Lamium galeobdolon (L.) L.",
+      "common_name": "Yellow archangel"
+    },
+    {
+      "species_id": "1361824",
+      "scientific_name": "Lavandula angustifolia Mill.",
+      "common_name": null
+    },
+    {
+      "species_id": "1361847",
+      "scientific_name": "Casuarina cunninghamiana Miq.",
+      "common_name": null
+    }
+  ]
+}
