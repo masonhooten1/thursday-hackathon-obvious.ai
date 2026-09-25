@@ -1,0 +1,87 @@
+# Eval gate: run the identify eval harness against the reference index release
+# asset. The gate reads top-5 accuracy over index-covered hold-out species -
+# raw top-5 is structurally bounded by coverage while the index is partial;
+# both print on every run, and eval.json is uploaded as an artifact either
+# way. When the ingestion pipeline re-ships the index (e.g. the full-index
+# re-run), bump the PLANT_EVAL_RELEASE repo variable (or the default below) to
+# the new release tag; the asset cache keys on it.
+name: eval
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "pipeline/**"
+      - "api/**"
+      - "data/**"
+      - "Makefile"
+      - "requirements-eval.txt"
+      - ".github/workflows/eval.yml"
+  pull_request:
+    paths:
+      - "pipeline/**"
+      - "api/**"
+      - "data/**"
+      - "Makefile"
+      - "requirements-eval.txt"
+      - ".github/workflows/eval.yml"
+  workflow_dispatch: {}
+
+env:
+  PLANT_EVAL_RELEASE: ${{ vars.PLANT_EVAL_RELEASE || 'plantnet-eval-partial-9000' }}
+
+jobs:
+  eval-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install eval dependencies
+        run: pip install -r pipeline/requirements.txt -r api/requirements.txt -r requirements-eval.txt
+
+      - name: Restore BioCLIP 2 weights
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: eval-hf-bioclip2
+
+      - name: Restore eval assets (reference index + hold-out images)
+        uses: actions/cache@v4
+        with:
+          path: .eval-cache
+          key: eval-assets-${{ env.PLANT_EVAL_RELEASE }}
+
+      - name: Download eval assets on cache miss
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f .eval-cache/index.tar.gz ] && [ -f .eval-cache/holdout-images.tar.gz ]; then
+            echo "eval assets cached"
+            exit 0
+          fi
+          mkdir -p .eval-cache
+          gh release download "$PLANT_EVAL_RELEASE" --repo "$GITHUB_REPOSITORY" \
+            --dir .eval-cache --clobber
+
+      - name: Unpack eval assets
+        run: |
+          tar xzf .eval-cache/index.tar.gz -C .
+          mkdir -p data
+          tar xzf .eval-cache/holdout-images.tar.gz -C data
+
+      - name: Run eval gate
+        env:
+          EVAL_INDEX_LABEL: ${{ env.PLANT_EVAL_RELEASE }}
+        run: make eval
+
+      - name: Upload eval.json
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-json
+          path: eval.json

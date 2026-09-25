@@ -18,6 +18,27 @@ from fastapi.testclient import TestClient
 from pipeline import config as pipeline_config
 
 
+def _reference_images():
+    """Catalog originals that are NOT the per-species hold-out (those aren't indexed)."""
+    holdout = {
+        entry["image_path"]
+        for entry in json.loads(Path(pipeline_config.HOLDOUT_MANIFEST).read_text(encoding="utf-8"))[
+            "holdout"
+        ].values()
+    }
+    return (
+        path
+        for path in sorted(Path(pipeline_config.IMAGES_DIR).glob("*/*/*.jpg"))
+        if path.relative_to(pipeline_config.IMAGES_DIR).as_posix() not in holdout
+    )
+
+
+def _pick_reference_image() -> Path:
+    images = list(_reference_images())
+    assert images, "real index present but no reference images on disk"
+    return images[0]
+
+
 def _real_index_ready() -> bool:
     lancedb_dir = Path(pipeline_config.LANCEDB_DIR)
     if not lancedb_dir.is_dir() or not any(lancedb_dir.glob("*.lance")):
@@ -30,7 +51,9 @@ def _real_index_ready() -> bool:
         import torch  # noqa: F401
     except ImportError:
         return False
-    return True
+    # The end-to-end case feeds a non-hold-out catalog ORIGINAL; an eval-only
+    # checkout holds just hold-out images, which are never indexed.
+    return next(_reference_images(), None) is not None
 
 
 pytestmark = pytest.mark.skipif(
@@ -71,20 +94,3 @@ def test_real_embedder_is_deterministic():
     second = service.embed_query(image_bytes)
 
     assert np.array_equal(first, second)
-
-
-def _pick_reference_image() -> Path:
-    """A catalog image that is NOT the per-species hold-out (those aren't indexed)."""
-    holdout = {
-        entry["image_path"]
-        for entry in json.loads(Path(pipeline_config.HOLDOUT_MANIFEST).read_text(encoding="utf-8"))[
-            "holdout"
-        ].values()
-    }
-    images = sorted(
-        path
-        for path in Path(pipeline_config.IMAGES_DIR).glob("*/*/*.jpg")
-        if path.relative_to(pipeline_config.IMAGES_DIR).as_posix() not in holdout
-    )
-    assert images, "real index present but no reference images on disk"
-    return images[0]
