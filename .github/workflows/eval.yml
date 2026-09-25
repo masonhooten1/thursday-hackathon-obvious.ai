@@ -2,9 +2,9 @@
 # asset. The gate reads top-5 accuracy over index-covered hold-out species -
 # raw top-5 is structurally bounded by coverage while the index is partial;
 # both print on every run, and eval.json is uploaded as an artifact either
-# way. When the ingestion pipeline re-ships the index (e.g. the full-index
-# re-run), bump the PLANT_EVAL_RELEASE repo variable (or the default below) to
-# the new release tag; the asset cache keys on it.
+# way. When the ingestion pipeline re-ships the index, bump the release tag in
+# the default below (repo variable PLANT_EVAL_RELEASE, if ever configured by a
+# repo admin, overrides it); the asset cache keys on the tag.
 name: eval
 
 on:
