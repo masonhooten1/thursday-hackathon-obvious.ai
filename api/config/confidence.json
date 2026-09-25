@@ -2,9 +2,9 @@
   "version": 1,
   "metric": "cosine_distance",
   "model_version": "bioclip2-vit-l14",
-  "high_below": 0.072522,
-  "medium_below": 0.207852,
-  "low_confidence_below": 0.207852,
+  "high_below": 0.058951,
+  "medium_below": 0.171758,
+  "low_confidence_below": 0.171758,
   "calibration": {
     "source": "data/holdout.json",
     "n_holdout": 110,
