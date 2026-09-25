@@ -8,7 +8,11 @@
 # themselves come from `make eval-data`, which streams the source shards once
 # and keeps only manifest rows (see pipeline/fetch_holdout.py).
 
-PY ?= .venv/bin/python
+# Interpreter: `python3` from your ACTIVE environment (eval deps installed via
+# requirements-eval.txt). Override for a non-activated layout, e.g.
+# `make eval PY=.venv/bin/python`. CI installs into the setup-python
+# interpreter and runs the default.
+PY ?= python3
 INDEX_DIR ?= data/lancedb
 CONFIDENCE_CONFIG ?= api/config/confidence.json
 EVAL_OUTPUT ?= eval.json
