@@ -33,11 +33,21 @@ Five projects share this monorepo:
 4. **SignalPlan** in `signalplan/`: Next.js 15 + TypeScript foundation — frozen Zod contracts
    (`lib/contracts`), Supabase schema + RLS, fail-closed auth, six authenticated API routes,
    Trigger.dev v4 scaffolding. Spec: art_zjmuRNQY.
-5. **StayRadar** in `stayradar/`: Next.js (pnpm) search shell with fixtures, plus a
-   Drizzle/PostGIS data layer (`properties` with a geography column + GiST
-   index, date-keyed `availability`, `search_events`, `leads`, `campaigns`),
-   an `ST_DWithin` radius search service, and seed/iCal/CSV ingestion
-   connectors with idempotent upserts.
+5. **StayRadar** in `stayradar/`: Next.js 15 + Tailwind v4 (pnpm) full-stack app —
+   map-first traveler search (MapLibre GL on OpenStreetMap tiles) with radius
+   overlay, search-this-area/widen actions, filters, and designed empty/stale/error
+   states; property detail with a 90-day color-coded availability calendar and an
+   inquiry flow with inline validation; four market landing pages with origin-city
+   UTM copy. Zod contracts in `src/lib/contracts` (single source of truth for wire
+   shapes) behind thin API routes (`/api/search`, `/api/properties/[id]`,
+   `/api/inquiries`, `/api/campaigns`, `/api/campaigns/generate`,
+   `/api/campaigns/[id]/export`), a Drizzle/PostGIS data layer (`properties` with
+   a geography column + GiST index, date-keyed `availability`, `search_events`,
+   `leads`, `campaigns`), an `ST_DWithin` radius search service, seed/iCal/CSV
+   ingestion connectors with idempotent upserts, and the marketing engine
+   (`src/lib/services/marketing/` — first-party segmentation, campaign generator
+   enforcing Google's 1 km proximity floor, mock AdsClient, JSON + Editor-style
+   CSV export) with the `/campaigns` console. Runbook: `stayradar/README.md`.
 
 ## Stack
 
@@ -53,7 +63,9 @@ Five projects share this monorepo:
   Ruff (lint + format) in the root `pyproject.toml`, pinned in `api/requirements-dev.txt` — not
   yet CI-gated.
 - **SignalPlan** — own package-lock and CI workflow; RLS tests need real Postgres.
-- **StayRadar** — own pnpm lockfile; built in the shared `ci.yml` lane.
+- **StayRadar** — own pnpm lockfile; built in the shared `ci.yml` lane (lint +
+  Vitest + Next build, with a `postgis/postgis:16-3.5` service container and
+  `TEST_DATABASE_URL` set — DB-backed integration tests skip cleanly without it).
 - **CI** — `.github/workflows/ci.yml` (extension + web + api + stayradar),
   `.github/workflows/signalplan.yml` (lint → tsc → Vitest with a Postgres service → Next build),
   `.github/workflows/campground.yml` (lint + typecheck + tests + Expo web export).
@@ -108,6 +120,10 @@ SignalPlan (from repo root):
 StayRadar (from repo root):
 
 - `pnpm --dir stayradar install` / `pnpm --dir stayradar lint` / `pnpm --dir stayradar test` / `pnpm --dir stayradar build`
+- `pnpm --dir stayradar dev` — dev server on :3000; API routes are DB-backed, so
+  set `DATABASE_URL` to a PostGIS Postgres, and `STAYRADAR_SERVER_API_ORIGIN`
+  for production-like runs (nested SSR fetches must not hairpin through the
+  public edge)
 - `pnpm --dir stayradar db:migrate` / `pnpm --dir stayradar db:seed` — apply
   migrations and upsert the 40-property seed inventory (idempotent); need a
   PostGIS Postgres. Integration tests run when `TEST_DATABASE_URL` is set
